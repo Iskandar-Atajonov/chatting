@@ -69,6 +69,15 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 #top b{font-family:Fraunces,serif;font-size:1.25rem}
 #top span{font-size:.8rem;color:#8f98c4;margin-left:10px}
 #st{font-size:.78rem;margin-left:10px;color:#8f98c4}#st.ok{color:#9fd8b0}#st.bad{color:#ff9d8a}
+#pl{position:absolute;top:62px;left:22px;z-index:3;background:#10163a;border:1px solid var(--line);border-radius:14px;padding:8px;min-width:230px;max-height:55vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+#pl[hidden]{display:none}
+.pr{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.88rem}
+.pr i{width:9px;height:9px;border-radius:50%;background:#4a5280;flex:none}
+.pr.on i{background:#4ade80;box-shadow:0 0 8px #4ade80}
+.pr small{margin-left:auto;color:#8f98c4;padding-left:10px}
+#pb{margin-left:12px!important;padding:3px 12px!important;font-size:.78rem!important;color:#4ade80!important}
+.av{position:relative}
+.av.on::after{content:"";position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#4ade80;border:2px solid #080b1a}
 #nm{background:#10163a;border:1px solid rgba(255,255,255,.15);color:inherit;border-radius:999px;padding:6px 14px;font:inherit;font-size:.85rem;width:130px;outline:none}#nm:focus{border-color:var(--butter)}
 #top button{border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:.85rem;margin-left:8px}
 #top button:hover{border-color:var(--butter);color:var(--butter)}
@@ -149,7 +158,8 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 </div></footer>
 
 <div id="chat" aria-hidden="true">
-  <div id="top"><div><b>Chat</b><span id="st">connecting…</span></div><div><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
+  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
+  <div id="pl" hidden></div>
   <div id="msgs"></div>
   <div id="ctx"></div>
   <form id="send" onsubmit="return false"><button type="button" id="att" aria-label="Attach image" title="Send image">+</button><input id="file" type="file" accept="image/*" hidden><input id="txt" placeholder="Write a message" autocomplete="off"><button>Send</button></form>
@@ -230,7 +240,13 @@ const sha = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", 
 const colors = ["#f3cf5b","#9fd8b0","#f4a99b","#a9c7f0","#d7b4f0","#f5c48a"];
 const colorOf = n => colors[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 
-let db, started = false, replyTo = null, pic = null;
+let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
+const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+function setPresence(on) {
+  if (!pref) return;
+  const TS = firebase.database.ServerValue.TIMESTAMP, off = { name: getName(), online: false, lastSeen: TS };
+  pref.onDisconnect().set(off).then(() => pref.set(on ? { name: getName(), online: true, lastSeen: TS } : off));
+}
 const note = t => { $("msgs").insertAdjacentHTML("beforeend", '<div id="note"></div>'); $("msgs").lastChild.textContent = t; };
 const chip = (x, ...kids) => { const d = document.createElement("div"); d.className = "chip"; const b = document.createElement("button"); b.type = "button"; b.textContent = "×"; b.onclick = x; d.append(...kids, b); return d; };
 const renderCtx = () => {
@@ -253,6 +269,24 @@ function startChat() {
     if (String(firebaseConfig.apiKey).startsWith("YOUR_") || String(firebaseConfig.databaseURL).startsWith("YOUR_")) throw new Error("config");
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
+    const uid = localStorage.getItem("chatUid") || ((crypto.randomUUID && crypto.randomUUID()) || Date.now() + "" + Math.random().toString(36).slice(2));
+    localStorage.setItem("chatUid", uid);
+    pref = db.ref("presence/" + uid);
+    db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
+    db.ref("presence").on("value", snap => {
+      const rows = [];
+      snap.forEach(c => { const v = c.val(); if (v && v.name && Date.now() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
+      rows.sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
+      onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
+      $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
+      const pl = $("pl"); pl.innerHTML = "";
+      rows.forEach(r => {
+        const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
+        d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === uid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
+        d.append(i, n, t); pl.append(d);
+      });
+      document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+    });
     db.ref(".info/connected").on("value", c => { $("st").textContent = c.val() ? "● connected to database" : "● not connected"; $("st").className = c.val() ? "ok" : "bad"; });
     $("msgs").innerHTML = '<div class="empty">No messages yet. Say hello.</div>';
     db.ref("messages").orderByChild("createdAt").on("child_added", snap => {
@@ -261,7 +295,7 @@ function startChat() {
       const near = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
       const el = document.createElement("div");
       el.className = "m" + (m.name === me ? " me" : "");
-      const av = document.createElement("div"); av.className = "av"; av.style.background = colorOf(String(m.name)); av.textContent = String(m.name || "?")[0].toUpperCase();
+      const av = document.createElement("div"); av.className = "av"; av.style.background = colorOf(String(m.name)); av.textContent = String(m.name || "?")[0].toUpperCase(); av.dataset.n = m.name; if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
       const s = document.createElement("small");
       s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
@@ -287,8 +321,8 @@ function startChat() {
   } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
 }
 
-const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); startChat(); setTimeout(() => $("txt").focus(), 500); };
-const close = () => { $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
+const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
+const close = () => { chatOpen = false; setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
 
 $("gate").addEventListener("submit", async e => {
   e.preventDefault();
@@ -296,6 +330,9 @@ $("gate").addEventListener("submit", async e => {
   else { $("gate").classList.add("err"); setTimeout(() => $("gate").classList.remove("err"), 600); }
 });
 $("close").onclick = close;
+$("pb").onclick = e => { e.stopPropagation(); $("pl").hidden = !$("pl").hidden; };
+addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; });
+$("nm").addEventListener("change", () => setPresence(chatOpen));
 $("att").onclick = () => $("file").click();
 $("file").onchange = async () => {
   const f = $("file").files[0]; $("file").value = ""; if (!f) return;
