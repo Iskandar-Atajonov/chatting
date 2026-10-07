@@ -284,7 +284,7 @@ const getName = () => (localStorage.getItem("chatName") || "Guest");
 
 // profile photos: show the photo if there is one, otherwise the coloured letter
 function setAv(a) {
-  const p = photosByUid[a.dataset.u] || photosByName[a.dataset.n];
+  const p = photosByName[a.dataset.n] || photosByUid[a.dataset.u];
   if (p) { a.style.backgroundImage = 'url("' + p + '")'; a.textContent = ""; }
   else { a.style.backgroundImage = ""; a.textContent = String(a.dataset.n || "?")[0].toUpperCase(); }
 }
@@ -305,8 +305,11 @@ function startChat() {
     pref = db.ref("presence/" + uid);
     db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
     db.ref("photos").on("value", snap => {
-      photosByUid = {}; photosByName = {};
-      snap.forEach(c => { const v = c.val(); if (v && typeof v.photo === "string" && v.photo.startsWith("data:image/")) { photosByUid[c.key] = v.photo; if (v.name) photosByName[v.name] = v.photo; } });
+      photosByUid = {}; photosByName = {}; const newest = {};
+      snap.forEach(c => { const v = c.val(); if (v && typeof v.photo === "string" && v.photo.startsWith("data:image/")) {
+        photosByUid[c.key] = v.photo;
+        const t = Number(v.updatedAt) || 0;
+        if (v.name && (!(v.name in newest) || t >= newest[v.name])) { newest[v.name] = t; photosByName[v.name] = v.photo; } } });
       applyPhotos();
     });
     db.ref("presence").on("value", snap => {
@@ -377,7 +380,7 @@ $("pf").onchange = async () => {
   if (!db) return note("Add your Firebase config first.");
   try {
     const d = await compress(f, 160, .8);
-    await db.ref("photos/" + myUid).set({ name: getName(), photo: d });
+    await db.ref("photos/" + myUid).set({ name: getName(), photo: d, updatedAt: firebase.database.ServerValue.TIMESTAMP });
   } catch (err) { note("Could not save profile photo" + (err && err.code ? " (" + err.code + ")" : "") + "."); }
 };
 $("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); refreshMine(); });
