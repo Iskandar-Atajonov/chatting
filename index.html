@@ -86,6 +86,8 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 .m.me{align-self:flex-end;flex-direction:row-reverse}
 @keyframes pop{from{opacity:0;transform:translateY(8px)}}
 .av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:.85rem;color:#080b1a}
+.av{background-size:cover;background-position:center}
+#myav{width:30px;height:30px;display:inline-grid;margin:0 8px 0 0;vertical-align:middle;cursor:pointer;font-size:.8rem}
 .bub{background:#141a3a;padding:9px 14px;border-radius:16px 16px 16px 4px;word-break:break-word}
 .me .bub{background:var(--butter);color:#1b1b0f;border-radius:16px 16px 4px 16px}
 .bub small{display:block;font-size:.72rem;opacity:.65;margin-bottom:1px}
@@ -158,7 +160,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 </div></footer>
 
 <div id="chat" aria-hidden="true">
-  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
+  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><span id="myav" class="av" title="Change profile photo"></span><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="photoBtn" type="button">Photo</button><input id="pf" type="file" accept="image/*" hidden><button id="close">Close</button></div></div>
   <div id="pl" hidden></div>
   <div id="msgs"></div>
   <div id="ctx"></div>
@@ -220,7 +222,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 
-// STEP 1: paste your Firebase web app config here
+// STEP 1: paste your Firebase web app config here (replace the placeholder values below with your old ones)
 const firebaseConfig = {
   apiKey: "AIzaSyDJt_flhmBdVqD-6sviwHq2lMs8GvZFLig",
   authDomain: "hello-50faf.firebaseapp.com",
@@ -241,7 +243,24 @@ const colors = ["#f3cf5b","#9fd8b0","#f4a99b","#a9c7f0","#d7b4f0","#f5c48a"];
 const colorOf = n => colors[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
+let myUid = localStorage.getItem("chatUid") || "", photosByUid = {}, photosByName = {};
 const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+
+// online list: redrawn every 20 seconds so "last seen" keeps counting without a refresh
+let presRows = [];
+function renderPresence() {
+  const rows = presRows.slice().sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
+  onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
+  $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
+  const pl = $("pl"); pl.innerHTML = "";
+  rows.forEach(r => {
+    const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
+    d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === myUid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
+    d.append(i, n, t); pl.append(d);
+  });
+  document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+}
+setInterval(renderPresence, 20000);
 function setPresence(on) {
   if (!pref) return;
   const TS = firebase.database.ServerValue.TIMESTAMP, off = { name: getName(), online: false, lastSeen: TS };
@@ -263,6 +282,18 @@ const compress = (file, max, q) => new Promise((res, rej) => {
 });
 const getName = () => (localStorage.getItem("chatName") || "Guest");
 
+// profile photos: show the photo if there is one, otherwise the coloured letter
+function setAv(a) {
+  const p = photosByUid[a.dataset.u] || photosByName[a.dataset.n];
+  if (p) { a.style.backgroundImage = 'url("' + p + '")'; a.textContent = ""; }
+  else { a.style.backgroundImage = ""; a.textContent = String(a.dataset.n || "?")[0].toUpperCase(); }
+}
+function refreshMine() {
+  const a = $("myav"), n = getName();
+  a.dataset.n = n; a.dataset.u = myUid; a.style.backgroundColor = colorOf(n); setAv(a);
+}
+function applyPhotos() { document.querySelectorAll(".av[data-n]").forEach(setAv); refreshMine(); }
+
 function startChat() {
   if (started) return; started = true;
   try {
@@ -270,22 +301,18 @@ function startChat() {
     firebase.initializeApp(firebaseConfig);
     db = firebase.database();
     const uid = localStorage.getItem("chatUid") || ((crypto.randomUUID && crypto.randomUUID()) || Date.now() + "" + Math.random().toString(36).slice(2));
-    localStorage.setItem("chatUid", uid);
+    localStorage.setItem("chatUid", uid); myUid = uid;
     pref = db.ref("presence/" + uid);
     db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
+    db.ref("photos").on("value", snap => {
+      photosByUid = {}; photosByName = {};
+      snap.forEach(c => { const v = c.val(); if (v && typeof v.photo === "string" && v.photo.startsWith("data:image/")) { photosByUid[c.key] = v.photo; if (v.name) photosByName[v.name] = v.photo; } });
+      applyPhotos();
+    });
     db.ref("presence").on("value", snap => {
       const rows = [];
       snap.forEach(c => { const v = c.val(); if (v && v.name && Date.now() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
-      rows.sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
-      onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
-      $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
-      const pl = $("pl"); pl.innerHTML = "";
-      rows.forEach(r => {
-        const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
-        d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === uid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
-        d.append(i, n, t); pl.append(d);
-      });
-      document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+      presRows = rows; renderPresence();
     });
     db.ref(".info/connected").on("value", c => { $("st").textContent = c.val() ? "● connected to database" : "● not connected"; $("st").className = c.val() ? "ok" : "bad"; });
     $("msgs").innerHTML = '<div class="empty">No messages yet. Say hello.</div>';
@@ -295,7 +322,7 @@ function startChat() {
       const near = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
       const el = document.createElement("div");
       el.className = "m" + (m.name === me ? " me" : "");
-      const av = document.createElement("div"); av.className = "av"; av.style.background = colorOf(String(m.name)); av.textContent = String(m.name || "?")[0].toUpperCase(); av.dataset.n = m.name; if (onlineNames.has(m.name)) av.classList.add("on");
+      const av = document.createElement("div"); av.className = "av"; av.style.backgroundColor = colorOf(String(m.name)); av.dataset.n = m.name; av.dataset.u = m.uid || ""; setAv(av); if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
       const s = document.createElement("small");
       s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
@@ -321,7 +348,7 @@ function startChat() {
   } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
 }
 
-const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
+const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); refreshMine(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
 const close = () => { chatOpen = false; setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
 
 $("gate").addEventListener("submit", async e => {
@@ -330,9 +357,9 @@ $("gate").addEventListener("submit", async e => {
   else { $("gate").classList.add("err"); setTimeout(() => $("gate").classList.remove("err"), 600); }
 });
 $("close").onclick = close;
-$("pb").onclick = e => { e.stopPropagation(); $("pl").hidden = !$("pl").hidden; };
+$("pb").onclick = e => { e.stopPropagation(); renderPresence(); $("pl").hidden = !$("pl").hidden; };
 addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; });
-$("nm").addEventListener("change", () => setPresence(chatOpen));
+$("nm").addEventListener("change", () => { setPresence(chatOpen); if (db && photosByUid[myUid]) db.ref("photos/" + myUid + "/name").set(getName()); });
 $("att").onclick = () => $("file").click();
 $("file").onchange = async () => {
   const f = $("file").files[0]; $("file").value = ""; if (!f) return;
@@ -343,7 +370,17 @@ $("file").onchange = async () => {
     pic = d; renderCtx();
   } catch (e) { note("Could not read that image."); }
 };
-$("nm").addEventListener("input", () => localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)));
+// profile photo upload
+$("photoBtn").onclick = $("myav").onclick = () => $("pf").click();
+$("pf").onchange = async () => {
+  const f = $("pf").files[0]; $("pf").value = ""; if (!f) return;
+  if (!db) return note("Add your Firebase config first.");
+  try {
+    const d = await compress(f, 160, .8);
+    await db.ref("photos/" + myUid).set({ name: getName(), photo: d });
+  } catch (err) { note("Could not save profile photo" + (err && err.code ? " (" + err.code + ")" : "") + "."); }
+};
+$("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); refreshMine(); });
 // smooth-scroll links without changing the URL (avoids file:// navigation errors)
 document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
   e.preventDefault(); const t = document.querySelector(a.getAttribute("href")); if (t) t.scrollIntoView({behavior: "smooth"});
@@ -354,7 +391,7 @@ $("send").addEventListener("submit", async e => {
   e.preventDefault();
   const text = $("txt").value.trim(); if ((!text && !pic) || !db) return;
   $("txt").value = "";
-  const data = { name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
+  const data = { name: getName(), uid: myUid, text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
   if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
   if (pic) data.image = pic;
   replyTo = null; pic = null; renderCtx();
