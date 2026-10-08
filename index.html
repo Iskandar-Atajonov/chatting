@@ -261,6 +261,8 @@ function renderPresence() {
   document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
 }
 setInterval(renderPresence, 20000);
+// online only while the chat is open AND this browser tab is the one being looked at
+const syncPresence = () => setPresence(chatOpen && document.visibilityState === "visible");
 function setPresence(on) {
   if (!pref) return;
   const TS = firebase.database.ServerValue.TIMESTAMP, off = { name: getName(), online: false, lastSeen: TS };
@@ -303,7 +305,7 @@ function startChat() {
     const uid = localStorage.getItem("chatUid") || ((crypto.randomUUID && crypto.randomUUID()) || Date.now() + "" + Math.random().toString(36).slice(2));
     localStorage.setItem("chatUid", uid); myUid = uid;
     pref = db.ref("presence/" + uid);
-    db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
+    db.ref(".info/connected").on("value", c => { if (c.val()) syncPresence(); });
     db.ref("photos").on("value", snap => {
       photosByUid = {}; photosByName = {}; const newest = {};
       snap.forEach(c => { const v = c.val(); if (v && typeof v.photo === "string" && v.photo.startsWith("data:image/")) {
@@ -362,7 +364,7 @@ $("gate").addEventListener("submit", async e => {
 $("close").onclick = close;
 $("pb").onclick = e => { e.stopPropagation(); renderPresence(); $("pl").hidden = !$("pl").hidden; };
 addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; });
-$("nm").addEventListener("change", () => { setPresence(chatOpen); if (db && photosByUid[myUid]) db.ref("photos/" + myUid + "/name").set(getName()); });
+$("nm").addEventListener("change", () => { syncPresence(); if (db && photosByUid[myUid]) db.ref("photos/" + myUid + "/name").set(getName()); });
 $("att").onclick = () => $("file").click();
 $("file").onchange = async () => {
   const f = $("file").files[0]; $("file").value = ""; if (!f) return;
@@ -389,6 +391,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click
   e.preventDefault(); const t = document.querySelector(a.getAttribute("href")); if (t) t.scrollIntoView({behavior: "smooth"});
 }));
 addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+// switching tab / minimizing = offline, coming back = online
+document.addEventListener("visibilitychange", () => { if (started) syncPresence(); });
 
 $("send").addEventListener("submit", async e => {
   e.preventDefault();
