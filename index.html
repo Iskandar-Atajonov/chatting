@@ -2,10 +2,6 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"><!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quanta | Quantum physics, explained</title>
 <link rel="icon" href="data:,">
@@ -84,6 +80,10 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 #pb{margin-left:12px!important;padding:3px 12px!important;font-size:.78rem!important;color:#4ade80!important}
 .av{position:relative}
 .av.on::after{content:"";position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#4ade80;border:2px solid #080b1a}
+.av,.pa{background-size:cover;background-position:center}
+.pa{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.7rem;font-weight:600;color:#080b1a;flex:none}
+#meav{width:32px;height:32px;margin-right:8px;cursor:pointer;display:inline-grid;vertical-align:middle;border:2px solid rgba(255,255,255,.2)}
+#meav:hover{border-color:var(--butter)}
 #nm{background:#10163a;border:1px solid rgba(255,255,255,.15);color:inherit;border-radius:999px;padding:6px 14px;font:inherit;font-size:.85rem;width:130px;outline:none}#nm:focus{border-color:var(--butter)}
 #top button{border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:.85rem;margin-left:8px}
 #top button:hover{border-color:var(--butter);color:var(--butter)}
@@ -159,12 +159,12 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta</span>
+  <span>&copy; 2026 Quanta · v4</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
 <div id="chat" aria-hidden="true">
-  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><button id="rf" type="button" hidden>↻ Refresh all</button><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
+  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><button id="rf" type="button" hidden>↻ Refresh all</button><div id="meav" class="av" role="button" tabindex="0" title="Click to change your profile photo (Shift+click removes it)"></div><input id="pf" type="file" accept="image/*" hidden><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
   <div id="pl" hidden></div>
   <div id="msgs"></div>
   <div id="ctx"></div>
@@ -246,6 +246,20 @@ const sha = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", 
 const colors = ["#f3cf5b","#9fd8b0","#f4a99b","#a9c7f0","#d7b4f0","#f5c48a"];
 const colorOf = n => colors[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
 
+let photos = {};
+const OKP = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/;
+const paintAv = (a, n) => {
+  const p = photos[n]; a.style.backgroundColor = colorOf(String(n));
+  if (p) { a.style.backgroundImage = 'url("' + p + '")'; a.textContent = ""; }
+  else { a.style.backgroundImage = ""; a.textContent = String(n || "?")[0].toUpperCase(); }
+};
+const paintMe = () => { const n = getName(); $("meav").dataset.n = n; paintAv($("meav"), n); };
+const square = (file, size, q) => new Promise((res, rej) => {
+  const img = new Image(), u = URL.createObjectURL(file);
+  img.onload = () => { const c = document.createElement("canvas"), m = Math.min(img.width, img.height); c.width = c.height = size;
+    c.getContext("2d").drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, size, size); URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", q)); };
+  img.onerror = rej; img.src = u;
+});
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
 const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
 function setPresence(on) {
@@ -297,6 +311,11 @@ function startChat() {
     localStorage.setItem("chatUid", uid);
     pref = db.ref("presence/" + uid);
     db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
+    db.ref("profiles").on("value", sn => {
+      const rows = []; sn.forEach(c => { const v = c.val(); if (v && v.name && OKP.test(String(v.photo)) && v.photo.length < 60000) rows.push(v); });
+      rows.sort((a, b) => (a.ts || 0) - (b.ts || 0)); photos = {}; rows.forEach(v => photos[v.name] = v.photo);
+      document.querySelectorAll(".av,.pa").forEach(a => paintAv(a, a.dataset.n)); paintMe();
+    }, () => {});
     db.ref("presence").on("value", snap => {
       const rows = [];
       snap.forEach(c => { const v = c.val(); if (v && v.name && Date.now() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
@@ -307,7 +326,7 @@ function startChat() {
       rows.forEach(r => {
         const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
         d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === uid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
-        d.append(i, n, t); pl.append(d);
+        const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t); pl.append(d);
       });
       document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
     });
@@ -319,7 +338,7 @@ function startChat() {
       const near = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
       const el = document.createElement("div");
       el.className = "m" + (m.name === me ? " me" : "");
-      const av = document.createElement("div"); av.className = "av"; av.style.background = colorOf(String(m.name)); av.textContent = String(m.name || "?")[0].toUpperCase(); av.dataset.n = m.name; if (onlineNames.has(m.name)) av.classList.add("on");
+      const av = document.createElement("div"); av.className = "av"; av.dataset.n = m.name; paintAv(av, m.name); if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
       const s = document.createElement("small");
       s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
@@ -345,7 +364,7 @@ function startChat() {
   } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
 }
 
-const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
+const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); paintMe(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
 const close = () => { chatOpen = false; setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
 
 $("gate").addEventListener("submit", async e => {
@@ -367,395 +386,19 @@ $("file").onchange = async () => {
     pic = d; renderCtx();
   } catch (e) { note("Could not read that image."); }
 };
-$("nm").addEventListener("input", () => localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)));
-// smooth-scroll links without changing the URL (avoids file:// navigation errors)
-document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
-  e.preventDefault(); const t = document.querySelector(a.getAttribute("href")); if (t) t.scrollIntoView({behavior: "smooth"});
-}));
-addEventListener("keydown", e => { if (e.key === "Escape") close(); });
-
-$("send").addEventListener("submit", async e => {
-  e.preventDefault();
-  const text = $("txt").value.trim(); if ((!text && !pic) || !db) return;
-  if (text.startsWith("/refresh ")) {
-    $("txt").value = "";
-    if (await sha(text.slice(9).trim()) === ADMIN_HASH) { localStorage.setItem("chatAdmin", "1"); refreshBtn(); note("Admin unlocked. Use the Refresh all button at the top."); }
-    else note("Wrong admin password.");
-    return;
-  }
-  $("txt").value = "";
-  const data = { name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
-  if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
-  if (pic) data.image = pic;
-  replyTo = null; pic = null; renderCtx();
-  const warn = setTimeout(() => $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not saved yet. Check: 1) your config values, 2) the databaseURL is exactly the one shown in Realtime Database, 3) the rules are published.</div>'), 6000);
-  try { await db.ref("messages").push(data); clearTimeout(warn); }
-  catch (err) { $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not sent (' + err.code + ')</div>'); }
-});
-</script>
-</body>
-</html>
-<title>Quanta | Quantum physics, explained</title>
-<link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#05060f;--ink:#e8ecff;--muted:#8f98c4;--butter:#7cf0ff;--green:#a78bfa;--line:rgba(255,255,255,.1)}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.65}
-h1,h2,h3{font-family:"Space Grotesk",system-ui,sans-serif;margin:0;letter-spacing:-.03em}
-a{color:inherit}
-#bg{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
-.veil{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 35%,transparent 0,rgba(5,6,15,.55) 70%)}
-main,header,footer{position:relative;z-index:1}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-header{position:sticky;top:0;z-index:5;backdrop-filter:blur(14px);background:rgba(5,6,15,.45);border-bottom:1px solid var(--line)}
-header .wrap{display:flex;justify-content:space-between;align-items:center;height:64px}
-.logo{font-family:"Space Grotesk",sans-serif;font-weight:700;font-size:1.25rem;letter-spacing:.2em;display:flex;align-items:center;gap:10px}
-.logo i{width:12px;height:12px;border-radius:50%;background:var(--butter);box-shadow:0 0 16px var(--butter),0 0 40px var(--green)}
-nav a{margin-left:26px;text-decoration:none;color:var(--muted);font-size:.92rem;transition:color .2s}
-nav a:hover{color:var(--butter)}
-.hero{min-height:calc(100vh - 64px);display:flex;flex-direction:column;justify-content:center;padding:40px 0 80px}
-.tag{display:inline-block;align-self:flex-start;font-size:.78rem;letter-spacing:.18em;text-transform:uppercase;color:var(--butter);border:1px solid rgba(124,240,255,.35);padding:6px 14px;border-radius:999px;background:rgba(124,240,255,.06);margin-bottom:26px}
-.hero h1{font-size:clamp(3rem,9vw,6.6rem);font-weight:700;line-height:.95;max-width:12ch;background:linear-gradient(120deg,#fff 20%,var(--butter) 55%,var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
-.hero p{max-width:50ch;color:var(--muted);font-size:1.18rem;margin:26px 0 34px}
-.btns{display:flex;gap:14px;flex-wrap:wrap}
-.btn{display:inline-block;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;transition:transform .2s,box-shadow .2s}
-.btn.p{background:linear-gradient(120deg,var(--butter),var(--green));color:#05060f}
-.btn.p:hover{transform:translateY(-3px);box-shadow:0 12px 40px -8px var(--butter)}
-.btn.g{border:1px solid var(--line);background:rgba(255,255,255,.04)}
-.btn.g:hover{border-color:var(--butter)}
-section{padding:70px 0}
-.eyebrow{color:var(--butter);font-size:.78rem;letter-spacing:.18em;text-transform:uppercase}
-section h2{font-size:clamp(2rem,5vw,3.2rem);margin:8px 0 34px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-.card{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:20px;padding:26px;backdrop-filter:blur(14px);transition:transform .3s,border-color .3s,box-shadow .3s}
-.card:hover{transform:translateY(-6px);border-color:rgba(124,240,255,.5);box-shadow:0 20px 50px -20px rgba(124,240,255,.35)}
-.card b{font-family:"Space Grotesk",sans-serif;font-size:2rem;background:linear-gradient(120deg,var(--butter),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent}
-.card h3{font-size:1.3rem;margin:10px 0 8px}
-.card p{margin:0;color:var(--muted);font-size:.95rem}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.stat{padding:26px;border-radius:20px;border:1px solid var(--line);background:rgba(255,255,255,.03)}
-.stat h3{font-size:1.7rem;color:var(--butter)}
-.stat p{margin:6px 0 0;color:var(--muted);font-size:.92rem}
-.tl{border-left:1px solid var(--line);margin-left:6px}
-.tl div{position:relative;padding:0 0 28px 28px}
-.tl div::before{content:"";position:absolute;left:-6px;top:7px;width:11px;height:11px;border-radius:50%;background:var(--butter);box-shadow:0 0 14px var(--butter)}
-.tl b{font-family:"Space Grotesk",sans-serif;color:var(--butter)}
-.tl p{margin:2px 0 0;color:var(--muted)}
-.rv{opacity:0;transform:translateY(26px);transition:opacity .8s,transform .8s}
-.rv.in{opacity:1;transform:none}
-footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filter:blur(10px);padding:30px 0;color:var(--muted);font-size:.88rem}
-.foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
-#gate{display:flex;gap:4px}
-#gate input{width:96px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:transparent;font:inherit;font-size:.78rem;color:var(--muted);outline:none}
-#gate input::placeholder{color:rgba(143,152,196,.35)}
-#gate input:focus{border-color:var(--butter)}
-#gate button{border:0;background:transparent;color:rgba(143,152,196,.4);cursor:pointer;font-size:.78rem}
-#gate.err input{border-color:#ff8a75;animation:shake .35s}
-@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
-/* chat */
-#chat{position:fixed;inset:0;z-index:10;background:#080b1a;color:#e8ecff;display:flex;flex-direction:column;transform:translateY(100%);visibility:hidden;transition:transform .5s cubic-bezier(.2,.8,.2,1),visibility 0s .5s}
-#chat.open{transform:none;visibility:visible;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
-#top{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid rgba(255,255,255,.08)}
-#top b{font-family:Fraunces,serif;font-size:1.25rem}
-#top span{font-size:.8rem;color:#8f98c4;margin-left:10px}
-#st{font-size:.78rem;margin-left:10px;color:#8f98c4}#st.ok{color:#9fd8b0}#st.bad{color:#ff9d8a}
-#rf[hidden]{display:none}
-#rf{border-color:var(--butter)!important;color:var(--butter)!important;margin-right:8px}
-#pl{position:absolute;top:62px;left:22px;z-index:3;background:#10163a;border:1px solid var(--line);border-radius:14px;padding:8px;min-width:230px;max-height:55vh;overflow:auto;box-shadow:0 20px 50px rgba(0,0,0,.5)}
-#pl[hidden]{display:none}
-.pr{display:flex;align-items:center;gap:8px;padding:6px 8px;font-size:.88rem}
-.pr i{width:9px;height:9px;border-radius:50%;background:#4a5280;flex:none}
-.pr.on i{background:#4ade80;box-shadow:0 0 8px #4ade80}
-.pr small{margin-left:auto;color:#8f98c4;padding-left:10px}
-#pb{margin-left:12px!important;padding:3px 12px!important;font-size:.78rem!important;color:#4ade80!important}
-.av{position:relative}
-.av.on::after{content:"";position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#4ade80;border:2px solid #080b1a}
-#nm{background:#10163a;border:1px solid rgba(255,255,255,.15);color:inherit;border-radius:999px;padding:6px 14px;font:inherit;font-size:.85rem;width:130px;outline:none}#nm:focus{border-color:var(--butter)}
-#top button{border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:.85rem;margin-left:8px}
-#top button:hover{border-color:var(--butter);color:var(--butter)}
-#msgs{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:10px;width:100%;max-width:780px;margin:0 auto}
-.m{display:flex;gap:10px;max-width:82%;animation:pop .25s ease both}
-.m.me{align-self:flex-end;flex-direction:row-reverse}
-@keyframes pop{from{opacity:0;transform:translateY(8px)}}
-.av{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:.85rem;color:#080b1a}
-.bub{background:#141a3a;padding:9px 14px;border-radius:16px 16px 16px 4px;word-break:break-word}
-.me .bub{background:var(--butter);color:#1b1b0f;border-radius:16px 16px 4px 16px}
-.bub small{display:block;font-size:.72rem;opacity:.65;margin-bottom:1px}
-.empty,#note{margin:auto;text-align:center;color:#8f98c4}
-#note{color:#ff9d8a}
-#send{display:flex;gap:10px;padding:16px 22px 22px;width:100%;max-width:780px;margin:0 auto}
-#send input{flex:1;padding:14px 18px;border:1px solid rgba(255,255,255,.12);border-radius:999px;font:inherit;background:#10163a;color:inherit;outline:none}
-#send input:focus{border-color:var(--butter)}
-#send button{background:var(--butter);color:#1b1b0f;border:0;border-radius:999px;padding:0 26px;font:inherit;font-weight:600;cursor:pointer}
-#ctx{max-width:780px;width:100%;margin:0 auto;padding:0 22px;display:flex;gap:8px;flex-wrap:wrap}
-#ctx:empty{display:none}
-.chip{display:flex;align-items:center;gap:8px;background:#10163a;border-left:3px solid var(--butter);border-radius:8px;padding:6px 10px;font-size:.82rem;max-width:100%}
-.chip img{height:44px;border-radius:6px}
-.chip button{background:none;border:0;color:inherit;cursor:pointer;font-size:1.1rem}
-.quote{border-left:3px solid rgba(255,255,255,.35);background:rgba(255,255,255,.07);padding:3px 8px;border-radius:6px;margin:3px 0 5px;font-size:.8rem;cursor:pointer}
-.me .quote{border-color:rgba(0,0,0,.35);background:rgba(0,0,0,.08)}
-.pic{max-width:100%;max-height:260px;border-radius:10px;display:block;margin:4px 0;cursor:zoom-in}
-.rb{opacity:0;border:0;background:none;color:#8f98c4;cursor:pointer;align-self:center;font-size:1.1rem}
-.m:hover .rb,.rb:focus{opacity:1}
-@media(hover:none){.rb{opacity:.6}}
-.flash .bub{outline:2px solid var(--butter)}
-#att{background:#10163a;color:var(--butter);border:1px solid rgba(255,255,255,.12);border-radius:999px;width:46px;font-size:1.4rem;padding:0;cursor:pointer}
-#lb{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;place-items:center;z-index:20;cursor:zoom-out}
-#lb.on{display:grid}#lb img{max-width:92%;max-height:92%;border-radius:8px}
-@media(max-width:760px){.hero{grid-template-columns:1fr}.loaf{max-width:260px}nav a{margin-left:14px}.m{max-width:92%}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-</style>
-</head>
-<body>
-<canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
-<header><div class="wrap"><div class="logo"><i></i>QUANTA</div><nav><a href="#ideas">Ideas</a><a href="#numbers">Numbers</a><a href="#history">History</a></nav></div></header>
-<main class="wrap">
-  <div class="hero">
-    <span class="tag">Quantum physics, explained</span>
-    <h1>Reality is a probability.</h1>
-    <p>At the smallest scales, particles behave like waves, share states across distance and refuse to be pinned down. Explore the ideas that rewrote physics.</p>
-    <div class="btns"><a class="btn p" href="#ideas">Explore the ideas</a><a class="btn g" href="#history">See the timeline</a></div>
-  </div>
-  <section id="ideas">
-    <span class="eyebrow">Core ideas</span><h2>Four ideas that break intuition</h2>
-    <div class="grid">
-      <div class="card rv"><b>01</b><h3>Superposition</h3><p>A system can exist as a blend of several states at once, until a measurement picks one.</p></div>
-      <div class="card rv"><b>02</b><h3>Entanglement</h3><p>Two particles can share a single state, so measuring one is correlated with the other at any distance.</p></div>
-      <div class="card rv"><b>03</b><h3>Wave-particle duality</h3><p>Light and matter produce interference patterns like waves, yet land as single points like particles.</p></div>
-      <div class="card rv"><b>04</b><h3>Uncertainty</h3><p>Position and momentum cannot both be known exactly. The limit is Δx·Δp ≥ ħ/2.</p></div>
-    </div>
-  </section>
-  <section id="numbers">
-    <span class="eyebrow">Constants</span><h2>The numbers behind it</h2>
-    <div class="stats">
-      <div class="stat rv"><h3>6.626 × 10⁻³⁴ J·s</h3><p>Planck's constant h, the scale of the quantum world.</p></div>
-      <div class="stat rv"><h3>299,792,458 m/s</h3><p>The speed of light in vacuum, exact by definition.</p></div>
-      <div class="stat rv"><h3>1.055 × 10⁻³⁴ J·s</h3><p>The reduced Planck constant ħ = h / 2π.</p></div>
-    </div>
-  </section>
-  <section id="history">
-    <span class="eyebrow">History</span><h2>From a hack to a theory</h2>
-    <div class="tl">
-      <div class="rv"><b>1900</b><p>Max Planck proposes that energy is exchanged in discrete quanta.</p></div>
-      <div class="rv"><b>1905</b><p>Einstein explains the photoelectric effect with quanta of light.</p></div>
-      <div class="rv"><b>1925 to 1927</b><p>Heisenberg and Schrödinger formulate quantum mechanics; Heisenberg states the uncertainty principle.</p></div>
-      <div class="rv"><b>1964</b><p>John Bell shows entanglement can be tested against local hidden variables.</p></div>
-      <div class="rv"><b>2022</b><p>Aspect, Clauser and Zeilinger win the Nobel Prize for their entanglement experiments.</p></div>
-    </div>
-  </section>
-</main>
-<footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v3</span>
-  <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
-</div></footer>
-
-<div id="chat" aria-hidden="true">
-  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><button id="rf" type="button" hidden>↻ Refresh all</button><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
-  <div id="pl" hidden></div>
-  <div id="msgs"></div>
-  <div id="ctx"></div>
-  <form id="send" onsubmit="return false"><button type="button" id="att" aria-label="Attach image" title="Send image">+</button><input id="file" type="file" accept="image/*" hidden><input id="txt" placeholder="Write a message" autocomplete="off"><button>Send</button></form>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-(function(){
-  const io = new IntersectionObserver(es => es.forEach(x => { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }), {threshold: .15});
-  document.querySelectorAll(".rv").forEach(el => io.observe(el));
-})();
-</script>
-<script>
-(function(){
-  try {
-    const T = window.THREE, cv = document.getElementById("bg");
-    const r = new T.WebGLRenderer({canvas: cv, antialias: true, alpha: true});
-    r.setPixelRatio(Math.min(devicePixelRatio, 2));
-    const sc = new T.Scene(), cam = new T.PerspectiveCamera(55, 1, .1, 100); cam.position.z = 12;
-    const g = new T.Group(); sc.add(g);
-    const N = 3000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T.Color("#7cf0ff"), c2 = new T.Color("#a78bfa");
-    for (let i = 0; i < N; i++) {
-      const rad = 2 + Math.pow(Math.random(), .6) * 10, th = Math.random() * 6.283, ph = Math.acos(2 * Math.random() - 1);
-      pos.set([rad * Math.sin(ph) * Math.cos(th), rad * Math.sin(ph) * Math.sin(th) * .7, rad * Math.cos(ph)], i * 3);
-      const c = c1.clone().lerp(c2, Math.random()); col.set([c.r, c.g, c.b], i * 3);
-    }
-    const pg = new T.BufferGeometry(); pg.setAttribute("position", new T.BufferAttribute(pos, 3)); pg.setAttribute("color", new T.BufferAttribute(col, 3));
-    const pts = new T.Points(pg, new T.PointsMaterial({size: .055, vertexColors: true, transparent: true, opacity: .85, depthWrite: false, blending: T.AdditiveBlending}));
-    g.add(pts);
-    const els = [];
-    [[3.2, .2], [4.4, 1.1], [5.7, -1]].forEach(([R, t], k) => {
-      const o = new T.Group(); o.rotation.set(t, k * 1.1, k * .6);
-      const pp = []; for (let i = 0; i <= 128; i++) { const a = i / 128 * 6.2832; pp.push(new T.Vector3(Math.cos(a) * R, 0, Math.sin(a) * R * .8)); }
-      o.add(new T.Line(new T.BufferGeometry().setFromPoints(pp), new T.LineBasicMaterial({color: 0x7cf0ff, transparent: true, opacity: .3})));
-      const e = new T.Mesh(new T.SphereGeometry(.15, 16, 16), new T.MeshBasicMaterial({color: 0xffffff})); o.add(e);
-      els.push({e, R, s: .55 + k * .22, p: k * 2.1}); g.add(o);
-    });
-    g.add(new T.Mesh(new T.SphereGeometry(.45, 24, 24), new T.MeshBasicMaterial({color: 0xa78bfa})));
-    g.add(new T.Mesh(new T.SphereGeometry(.95, 24, 24), new T.MeshBasicMaterial({color: 0x7cf0ff, transparent: true, opacity: .12, blending: T.AdditiveBlending, depthWrite: false})));
-    const size = () => { r.setSize(innerWidth, innerHeight, false); cam.aspect = innerWidth / innerHeight; cam.updateProjectionMatrix(); g.position.x = innerWidth > 800 ? 3 : 0; };
-    size(); addEventListener("resize", size);
-    let mx = 0, my = 0; addEventListener("pointermove", e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
-    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const tick = t => {
-      t *= .001;
-      els.forEach(o => { const a = t * o.s + o.p; o.e.position.set(Math.cos(a) * o.R, 0, Math.sin(a) * o.R * .8); });
-      g.rotation.y += (t * .12 + mx * .8 - g.rotation.y) * .04;
-      g.rotation.x += (my * .5 + scrollY * .0007 - g.rotation.x) * .04;
-      pts.rotation.y = t * .03; cam.position.z = 12 + Math.min(scrollY, 1500) * .003;
-      r.render(sc, cam); if (!still) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  } catch (e) { console.warn("3D background unavailable", e); }
-})();
-</script>
-<div id="lb" onclick="this.classList.remove('on')"><img id="lbi" alt=""></div>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-<script>
-
-// STEP 1: paste your Firebase web app config here
-const firebaseConfig = {
-  apiKey: "AIzaSyDJt_flhmBdVqD-6sviwHq2lMs8GvZFLig",
-  authDomain: "hello-50faf.firebaseapp.com",
-  databaseURL: "https://hello-50faf-default-rtdb.firebaseio.com",
-  projectId: "hello-50faf",
-  storageBucket: "hello-50faf.firebasestorage.app",
-  messagingSenderId: "1070419381922",
-  appId: "1:1070419381922:web:0489e389a71da0e68311fb",
-  measurementId: "G-VX54VWV7J7"
+$("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); paintMe(); });
+const myUid = () => localStorage.getItem("chatUid");
+$("nm").addEventListener("change", () => { if (db && myUid()) db.ref("profiles/" + myUid()).once("value").then(x => { if (x.exists()) x.ref.update({ name: getName() }); }); });
+$("meav").onclick = e => {
+  if (!db) return note("Not connected to Firebase yet.");
+  if (e.shiftKey) return db.ref("profiles/" + myUid()).remove();
+  $("pf").click();
 };
-
-// SHA-256 of the password (so it is not written in plain text)
-const HASH = "44e7618aae12a7704d40e40ecb765178584d7c4dd3b312350f15c6278bcf114d";
-
-const $ = id => document.getElementById(id);
-const sha = async s => [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map(b => b.toString(16).padStart(2, "0")).join("");
-const colors = ["#f3cf5b","#9fd8b0","#f4a99b","#a9c7f0","#d7b4f0","#f5c48a"];
-const colorOf = n => colors[[...n].reduce((a, c) => a + c.charCodeAt(0), 0) % colors.length];
-
-let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
-const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
-function setPresence(on) {
-  if (!pref) return;
-  const TS = firebase.database.ServerValue.TIMESTAMP, off = { name: getName(), online: false, lastSeen: TS };
-  pref.onDisconnect().set(off).then(() => pref.set(on ? { name: getName(), online: true, lastSeen: TS } : off));
-}
-const note = t => { $("msgs").insertAdjacentHTML("beforeend", '<div id="note"></div>'); $("msgs").lastChild.textContent = t; };
-const chip = (x, ...kids) => { const d = document.createElement("div"); d.className = "chip"; const b = document.createElement("button"); b.type = "button"; b.textContent = "×"; b.onclick = x; d.append(...kids, b); return d; };
-const renderCtx = () => {
-  const c = $("ctx"); c.innerHTML = "";
-  if (replyTo) c.append(chip(() => { replyTo = null; renderCtx(); }, "Replying to " + replyTo.name + ": " + (replyTo.text || "photo").slice(0, 60)));
-  if (pic) { const i = document.createElement("img"); i.src = pic; c.append(chip(() => { pic = null; renderCtx(); }, i)); }
+$("pf").onchange = async () => {
+  const f = $("pf").files[0]; $("pf").value = ""; if (!f || !db) return;
+  try { await db.ref("profiles/" + myUid()).set({ name: getName(), photo: await square(f, 160, .8), ts: firebase.database.ServerValue.TIMESTAMP }); }
+  catch (err) { note("Could not save the photo (" + (err.code || "error") + "). Check the rules."); }
 };
-const compress = (file, max, q) => new Promise((res, rej) => {
-  const img = new Image(), u = URL.createObjectURL(file);
-  img.onload = () => { const k = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
-    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", q)); };
-  img.onerror = rej; img.src = u;
-});
-const getName = () => (localStorage.getItem("chatName") || "Guest");
-
-const ADMIN_HASH = "ebfb7346e11e04780dc9b2129b92e6d8417147e3e34e630cc205ff558d127d64"; // SHA-256 of your admin password (used with /refresh <password> in the chat)
-function initDb() {
-  if (db) return db;
-  if (String(firebaseConfig.apiKey).startsWith("YOUR_") || String(firebaseConfig.databaseURL).startsWith("YOUR_")) throw new Error("config");
-  firebase.initializeApp(firebaseConfig);
-  return (db = firebase.database());
-}
-const refreshBtn = () => { $("rf").hidden = localStorage.getItem("chatAdmin") !== "1"; };
-refreshBtn();
-$("rf").onclick = () => {
-  const b = $("rf");
-  if (b.dataset.arm) { clearTimeout(+b.dataset.arm); delete b.dataset.arm; b.textContent = "↻ Refresh all"; if (db) db.ref("control/reload").set(firebase.database.ServerValue.TIMESTAMP); return; }
-  b.textContent = "Sure? Click again"; b.dataset.arm = setTimeout(() => { delete b.dataset.arm; b.textContent = "↻ Refresh all"; }, 4000);
-};
-// every visitor (chat open or not) reloads when the admin triggers a refresh
-try {
-  initDb(); let base, got = false;
-  db.ref("control/reload").on("value", sn => { const v = sn.val() || 0; if (!got) { got = true; base = v; return; } if (v !== base) location.reload(); }, () => {});
-} catch (e) {}
-
-function startChat() {
-  if (started) return; started = true;
-  try {
-    initDb();
-    const uid = localStorage.getItem("chatUid") || ((crypto.randomUUID && crypto.randomUUID()) || Date.now() + "" + Math.random().toString(36).slice(2));
-    localStorage.setItem("chatUid", uid);
-    pref = db.ref("presence/" + uid);
-    db.ref(".info/connected").on("value", c => { if (c.val()) setPresence(chatOpen); });
-    db.ref("presence").on("value", snap => {
-      const rows = [];
-      snap.forEach(c => { const v = c.val(); if (v && v.name && Date.now() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
-      rows.sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
-      onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
-      $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
-      const pl = $("pl"); pl.innerHTML = "";
-      rows.forEach(r => {
-        const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
-        d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === uid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
-        d.append(i, n, t); pl.append(d);
-      });
-      document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
-    });
-    db.ref(".info/connected").on("value", c => { $("st").textContent = c.val() ? "● connected to database" : "● not connected"; $("st").className = c.val() ? "ok" : "bad"; });
-    $("msgs").innerHTML = '<div class="empty">No messages yet. Say hello.</div>';
-    db.ref("messages").orderByChild("createdAt").on("child_added", snap => {
-      const box = $("msgs"), m = snap.val(), me = getName();
-      const e0 = box.querySelector(".empty"); if (e0) e0.remove();
-      const near = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
-      const el = document.createElement("div");
-      el.className = "m" + (m.name === me ? " me" : "");
-      const av = document.createElement("div"); av.className = "av"; av.style.background = colorOf(String(m.name)); av.textContent = String(m.name || "?")[0].toUpperCase(); av.dataset.n = m.name; if (onlineNames.has(m.name)) av.classList.add("on");
-      const b = document.createElement("div"); b.className = "bub";
-      const s = document.createElement("small");
-      s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-      const stick = near || m.name === me;
-      el.id = "m-" + snap.key; b.append(s);
-      if (m.reply) {
-        const q = document.createElement("div"); q.className = "quote"; q.textContent = m.reply.name + ": " + (m.reply.text || "photo");
-        q.onclick = () => { const t = document.getElementById("m-" + m.reply.id); if (t) { t.scrollIntoView({behavior: "smooth", block: "center"}); t.classList.add("flash"); setTimeout(() => t.classList.remove("flash"), 1200); } };
-        b.append(q);
-      }
-      if (typeof m.image === "string" && m.image.startsWith("data:image/")) {
-        const i = document.createElement("img"); i.className = "pic"; i.src = m.image;
-        i.onload = () => { if (stick) box.scrollTop = box.scrollHeight; };
-        i.onclick = () => { $("lbi").src = m.image; $("lb").classList.add("on"); };
-        b.append(i);
-      }
-      if (m.text) b.append(document.createTextNode(m.text));
-      const rb = document.createElement("button"); rb.className = "rb"; rb.type = "button"; rb.textContent = "↩"; rb.title = "Reply";
-      rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || ""}; renderCtx(); $("txt").focus(); };
-      el.append(av, b, rb); box.append(el);
-      if (stick) box.scrollTop = box.scrollHeight;
-    }, err => { $("msgs").innerHTML = '<div id="note">Could not load messages (' + err.code + '). Check your Realtime Database rules.</div>'; });
-  } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
-}
-
-const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
-const close = () => { chatOpen = false; setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
-
-$("gate").addEventListener("submit", async e => {
-  e.preventDefault();
-  if (await sha($("pw").value) === HASH) { $("pw").value = ""; open(); }
-  else { $("gate").classList.add("err"); setTimeout(() => $("gate").classList.remove("err"), 600); }
-});
-$("close").onclick = close;
-$("pb").onclick = e => { e.stopPropagation(); $("pl").hidden = !$("pl").hidden; };
-addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; });
-$("nm").addEventListener("change", () => setPresence(chatOpen));
-$("att").onclick = () => $("file").click();
-$("file").onchange = async () => {
-  const f = $("file").files[0]; $("file").value = ""; if (!f) return;
-  try {
-    let d = await compress(f, 1000, .65);
-    if (d.length > 300000) d = await compress(f, 700, .5);
-    if (d.length > 300000) return note("That image is too large.");
-    pic = d; renderCtx();
-  } catch (e) { note("Could not read that image."); }
-};
-$("nm").addEventListener("input", () => localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)));
 // smooth-scroll links without changing the URL (avoids file:// navigation errors)
 document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener("click", e => {
   e.preventDefault(); const t = document.querySelector(a.getAttribute("href")); if (t) t.scrollIntoView({behavior: "smooth"});
