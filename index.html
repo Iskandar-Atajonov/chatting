@@ -155,7 +155,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta</span>
+  <span>&copy; 2026 Quanta · v3</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -372,13 +372,15 @@ addEventListener("keydown", e => { if (e.key === "Escape") close(); });
 
 $("send").addEventListener("submit", async e => {
   e.preventDefault();
-  const text = $("txt").value.trim(); if ((!text && !pic) || !db) return;
+  const text = $("txt").value.trim();
   if (text.startsWith("/refresh ")) {
     $("txt").value = "";
+    if (!db) return note("Not connected to Firebase. Check your firebaseConfig and databaseURL in index.html.");
     if (await sha(text.slice(9).trim()) === ADMIN_HASH) { localStorage.setItem("chatAdmin", "1"); refreshBtn(); note("Admin unlocked. Use the Refresh all button at the top."); }
     else note("Wrong admin password.");
     return;
   }
+  if ((!text && !pic) || !db) return;
   $("txt").value = "";
   const data = { name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
   if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
