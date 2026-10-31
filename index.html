@@ -162,7 +162,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v6</span>
+  <span>&copy; 2026 Quanta · v7</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -299,9 +299,12 @@ const squeezeVideo = file => new Promise((res, rej) => {
         rec.onstop = () => { ac.close(); res(new Blob(parts, { type: mime.split(";")[0] })); };
         let on = true; const stop = () => { on = false; if (rec.state !== "inactive") rec.stop(); };
         const draw = () => { if (!on) return; cx.drawImage(v, 0, 0, w, h); requestAnimationFrame(draw); };
-        rec.start(); await v.play(); draw();
+        if (v.readyState < 2) await new Promise(r => v.addEventListener("loadeddata", r, { once: true }));
+        draw(); rec.start();
+        await new Promise(r => setTimeout(r, 900)); // let the picture start recording before the sound begins
+        await v.play();
         v.onended = () => setTimeout(stop, 1200);
-        setTimeout(stop, (v.duration + 5) * 1000);
+        setTimeout(stop, (v.duration + 7) * 1000);
       } catch (e) { rej(e); }
     };
   } catch (e) { rej(e); }
