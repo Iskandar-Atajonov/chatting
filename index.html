@@ -112,6 +112,22 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 .vbtn{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 16px;cursor:pointer;color:inherit;font:inherit;margin:4px 0}
 .vbtn:hover{border-color:var(--butter)}
 .vid{max-width:100%;max-height:320px;border-radius:10px;display:block;margin:4px 0}
+.mb{opacity:0;border:0;background:none;color:#8f98c4;cursor:pointer;align-self:center;font-size:1.2rem}
+.m:hover .mb,.mb:focus{opacity:1}
+@media(hover:none){.mb{opacity:.6}}
+.rx{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.rxc{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:inherit;border-radius:999px;padding:1px 9px;font:inherit;font-size:.8rem;cursor:pointer}
+.me .rxc{border-color:rgba(0,0,0,.3);background:rgba(0,0,0,.08)}
+.rxc.mine{border-color:var(--butter);background:rgba(124,240,255,.18)}
+.me .rxc.mine{border-color:#1b1b0f;background:rgba(0,0,0,.22)}
+#mm{position:fixed;z-index:30;background:#10163a;border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 20px 50px rgba(0,0,0,.55);min-width:210px;color:#e8ecff}
+#mm[hidden]{display:none}
+#mm .em{display:flex;gap:2px;padding:2px 2px 6px;border-bottom:1px solid var(--line);margin-bottom:4px}
+#mm .em button{border:0;background:none;font-size:1.35rem;cursor:pointer;border-radius:8px;padding:2px 6px}
+#mm .em button:hover{background:rgba(255,255,255,.1)}
+#mm .act{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;font:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
+#mm .act:hover{background:rgba(255,255,255,.08)}
+#mm .act.danger{color:#ff9d8a}
 .rb{opacity:0;border:0;background:none;color:#8f98c4;cursor:pointer;align-self:center;font-size:1.1rem}
 .m:hover .rb,.rb:focus{opacity:1}
 @media(hover:none){.rb{opacity:.6}}
@@ -162,7 +178,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v7</span>
+  <span>&copy; 2026 Quanta · v8</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -224,6 +240,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   } catch (e) { console.warn("3D background unavailable", e); }
 })();
 </script>
+<div id="mm" hidden></div>
 <div id="lb" onclick="this.classList.remove('on')"><img id="lbi" alt=""></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
@@ -263,7 +280,7 @@ const square = (file, size, q) => new Promise((res, rej) => {
   img.onerror = rej; img.src = u;
 });
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
-let presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
+let editing = null, presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
 const nowMs = () => Date.now() + clockOffset;
 const ago = t => { const m = Math.max(0, Math.floor((nowMs() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.floor(m / 60) + " h ago" : Math.floor(m / 1440) + " d ago"; };
 function renderPresence() {
@@ -277,6 +294,28 @@ function renderPresence() {
     const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t); pl.append(d);
   });
   document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+}
+const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+const myUid = () => localStorage.getItem("chatUid");
+const react = (key, e) => { const r = db.ref("messages/" + key + "/reactions/" + myUid()); r.once("value").then(x => x.val() === e ? r.remove() : r.set(e)); };
+function openMenu(key, m, anchor) {
+  const mm = $("mm"); mm.innerHTML = "";
+  const em = document.createElement("div"); em.className = "em";
+  EMOJIS.forEach(e => { const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.onclick = () => { react(key, e); mm.hidden = true; }; em.append(b); });
+  mm.append(em);
+  const act = (label, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "act " + (cls || ""); b.textContent = label; b.onclick = fn; mm.append(b); return b; };
+  act("↩ Reply", () => { replyTo = { id: key, name: m.name, text: m.text || "" }; renderCtx(); $("txt").focus(); mm.hidden = true; });
+  if (m.uid ? m.uid === myUid() : m.name === getName()) {
+    act("✎ Edit", () => { editing = { key, media: !!(m.image || m.video) }; $("txt").value = m.text || ""; renderCtx(); $("txt").focus(); mm.hidden = true; });
+    const d = act("🗑 Delete", () => {
+      if (!d.dataset.arm) { d.dataset.arm = "1"; d.textContent = "Tap again to delete"; return; }
+      db.ref("messages/" + key).remove(); if (m.video && m.video.id) db.ref("media/" + m.video.id).remove(); mm.hidden = true;
+    }, "danger");
+  }
+  mm.hidden = false;
+  const r = anchor.getBoundingClientRect(), w = mm.offsetWidth, h = mm.offsetHeight;
+  mm.style.left = Math.max(8, Math.min(innerWidth - w - 8, r.left - w / 2)) + "px";
+  mm.style.top = (r.bottom + h + 8 > innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + "px";
 }
 const readURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
 // re-encode a short clip to a small WebM/MP4 in the browser (plays it silently while recording)
@@ -333,6 +372,7 @@ const chip = (x, ...kids) => { const d = document.createElement("div"); d.classN
 const renderCtx = () => {
   const c = $("ctx"); c.innerHTML = "";
   if (replyTo) c.append(chip(() => { replyTo = null; renderCtx(); }, "Replying to " + replyTo.name + ": " + (replyTo.text || "photo").slice(0, 60)));
+  if (editing) c.append(chip(() => { editing = null; $("txt").value = ""; renderCtx(); }, "Editing message"));
   if (vidBusy) c.append(chip(() => {}, vidBusy));
   if (vid) c.append(chip(() => { vid = null; renderCtx(); }, "Video ready (" + (vid.size / 1048576).toFixed(1) + " MB)"));
   if (pic) { const i = document.createElement("img"); i.src = pic; c.append(chip(() => { pic = null; renderCtx(); }, i)); }
@@ -390,7 +430,7 @@ function startChat() {
     setInterval(renderPresence, 15000);
     db.ref(".info/connected").on("value", c => { $("st").textContent = c.val() ? "● connected to database" : "● not connected"; $("st").className = c.val() ? "ok" : "bad"; });
     $("msgs").innerHTML = '<div class="empty">No messages yet. Say hello.</div>';
-    db.ref("messages").orderByChild("createdAt").on("child_added", snap => {
+    const drawMsg = (snap, isChange) => {
       const box = $("msgs"), m = snap.val(), me = getName();
       const e0 = box.querySelector(".empty"); if (e0) e0.remove();
       const near = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
@@ -399,7 +439,7 @@ function startChat() {
       const av = document.createElement("div"); av.className = "av"; av.dataset.n = m.name; paintAv(av, m.name); if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
       const s = document.createElement("small");
-      s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+      s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) + (m.edited ? " · edited" : "");
       const stick = near || m.name === me;
       el.id = "m-" + snap.key; b.append(s);
       if (m.reply) {
@@ -428,11 +468,26 @@ function startChat() {
         b.append(vb);
       }
       if (m.text) b.append(document.createTextNode(m.text));
+      if (m.reactions) {
+        const cnt = {}; Object.entries(m.reactions).forEach(([u, e]) => (cnt[e] = cnt[e] || []).push(u));
+        const row = document.createElement("div"); row.className = "rx";
+        Object.entries(cnt).forEach(([e, us]) => { const c = document.createElement("button"); c.type = "button"; c.className = "rxc" + (us.includes(myUid()) ? " mine" : ""); c.textContent = e + " " + us.length; c.onclick = () => react(snap.key, e); row.append(c); });
+        b.append(row);
+      }
       const rb = document.createElement("button"); rb.className = "rb"; rb.type = "button"; rb.textContent = "↩"; rb.title = "Reply";
       rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || ""}; renderCtx(); $("txt").focus(); };
-      el.append(av, b, rb); box.append(el);
-      if (stick) box.scrollTop = box.scrollHeight;
-    }, err => { $("msgs").innerHTML = '<div id="note">Could not load messages (' + err.code + '). Check your Realtime Database rules.</div>'; });
+      const mb = document.createElement("button"); mb.className = "mb"; mb.type = "button"; mb.textContent = "⋯"; mb.title = "React, edit, delete";
+      mb.onclick = ev => { ev.stopPropagation(); openMenu(snap.key, m, mb); };
+      b.oncontextmenu = ev => { ev.preventDefault(); openMenu(snap.key, m, b); };
+      el.append(av, b, rb, mb);
+      const old = isChange && document.getElementById("m-" + snap.key);
+      if (old) old.replaceWith(el); else box.append(el);
+      if (stick && !old) box.scrollTop = box.scrollHeight;
+    };
+    const mq = db.ref("messages").orderByChild("createdAt");
+    mq.on("child_added", sn => drawMsg(sn, false), err => { $("msgs").innerHTML = '<div id="note">Could not load messages (' + err.code + '). Check your Realtime Database rules.</div>'; });
+    mq.on("child_changed", sn => drawMsg(sn, true));
+    mq.on("child_removed", sn => { const o = document.getElementById("m-" + sn.key); if (o) o.remove(); });
   } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
 }
 
@@ -446,7 +501,7 @@ $("gate").addEventListener("submit", async e => {
 });
 $("close").onclick = close;
 $("pb").onclick = e => { e.stopPropagation(); $("pl").hidden = !$("pl").hidden; };
-addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; });
+addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; if (!e.target.closest("#mm")) $("mm").hidden = true; });
 $("nm").addEventListener("change", () => setPresence(chatOpen));
 $("att").onclick = () => $("file").click();
 $("file").onchange = async () => {
@@ -460,7 +515,6 @@ $("file").onchange = async () => {
   } catch (e) { note("Could not read that image."); }
 };
 $("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); paintMe(); });
-const myUid = () => localStorage.getItem("chatUid");
 $("nm").addEventListener("change", () => { if (db && myUid()) db.ref("profiles/" + myUid()).once("value").then(x => { if (x.exists()) x.ref.update({ name: getName() }); }); });
 $("meav").onclick = e => {
   if (!db) return note("Not connected to Firebase yet.");
@@ -481,6 +535,12 @@ addEventListener("keydown", e => { if (e.key === "Escape") close(); });
 $("send").addEventListener("submit", async e => {
   e.preventDefault();
   const text = $("txt").value.trim();
+  if (editing) {
+    const ed = editing; editing = null; $("txt").value = ""; renderCtx();
+    if (!text && !ed.media) return note("A message can't be empty. Use Delete to remove it.");
+    try { await db.ref("messages/" + ed.key).update({ text: text.slice(0, 500), edited: true }); } catch (err) { note("Could not edit (" + (err.code || "error") + "). Check the rules."); }
+    return;
+  }
   if (text.startsWith("/refresh ")) {
     $("txt").value = "";
     if (!db) return note("Not connected to Firebase. Check your firebaseConfig and databaseURL in index.html.");
@@ -490,7 +550,7 @@ $("send").addEventListener("submit", async e => {
   }
   if ((!text && !pic && !vid) || !db) return;
   $("txt").value = "";
-  const data = { name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
+  const data = { uid: myUid(), name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
   if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
   if (pic) data.image = pic;
   const v = vid; if (v) data.video = { id: db.ref("media").push().key, size: v.size };
