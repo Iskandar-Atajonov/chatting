@@ -243,6 +243,14 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 .exp{font-size:.8rem;font-style:italic;opacity:.7;margin-top:4px}
 #cl[hidden]{display:none}
 </style>
+<style id="v14">
+.mf{display:flex;justify-content:flex-end;align-items:center;gap:4px;font-size:.7rem;opacity:.8;margin-top:3px;white-space:nowrap;float:none}
+.tick{font-size:.9rem;letter-spacing:-3px;margin-left:2px}
+.me .tick{color:rgba(8,16,42,.55)}
+.me .tick.read{color:#0a2a8a;opacity:1}
+.bub.noBg .mf{color:#8f98c4}
+.me .bub.noBg .tick.read{color:#7cf0ff}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
@@ -283,7 +291,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v13</span>
+  <span>&copy; 2026 Quanta · v14</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -502,7 +510,12 @@ let readsMap = {}, latestTs = 0, myReadTs = 0, readTimer = null;
 const readersFor = ts => Object.entries(readsMap).filter(([u, r]) => u !== myUid() && r.ts >= ts).map(([, r]) => r.name);
 const setTick = tk => { const rs = readersFor(+tk.dataset.ts); tk.textContent = rs.length ? "✓✓" : "✓"; tk.classList.toggle("read", rs.length > 0); tk.title = rs.length ? "Seen by " + rs.join(", ") : "Sent"; };
 const refreshTicks = () => document.querySelectorAll(".tick").forEach(setTick);
-function markRead() { if (!db || !active() || latestTs <= myReadTs) return; myReadTs = latestTs; db.ref("reads/" + myUid()).set({ name: getName(), ts: latestTs }); }
+let readErr = false;
+function markRead() {
+  if (!db || !chatOpen || document.hidden || latestTs <= myReadTs) return;
+  myReadTs = latestTs;
+  db.ref("reads/" + myUid()).set({ name: getName(), ts: latestTs }).catch(() => { if (!readErr) { readErr = true; note("Read ticks need the 'reads' rule in Firebase. Add it in Rules and publish."); } });
+}
 function scheduleRead() { clearTimeout(readTimer); readTimer = setTimeout(markRead, 500); }
 const syncPresence = () => { if (db) setPresence(active()); scheduleRead(); };
 document.addEventListener("visibilitychange", syncPresence); addEventListener("focus", syncPresence); addEventListener("blur", syncPresence);
@@ -629,8 +642,8 @@ function startChat() {
       const av = document.createElement("div"); av.className = "av"; av.dataset.n = m.name; paintAv(av, m.name); if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
       const s = document.createElement("small"); if (m.name !== me) s.style.color = colorOf(String(m.name)); const mineMsg = m.uid ? m.uid === myUid() : m.name === me; if (m.createdAt > latestTs) latestTs = m.createdAt;
-      s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) + (m.edited ? " · edited" : "");
-      if (mineMsg) { const tk = document.createElement("span"); tk.className = "tick"; tk.dataset.ts = m.createdAt || 0; setTick(tk); s.append(" ", tk); }
+      const tstr = new Date(m.createdAt || nowMs()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (m.edited ? " · edited" : "");
+      s.textContent = m.name; if (mineMsg) s.style.display = "none";
       const stick = near || m.name === me;
       el.id = "m-" + snap.key; b.append(s);
       if (m.reply) {
@@ -709,6 +722,9 @@ function startChat() {
       }
       const rb = document.createElement("button"); rb.className = "rb"; rb.type = "button"; rb.textContent = "↩"; rb.title = "Reply";
       rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || ""}; renderCtx(); $("txt").focus(); };
+      const ft = document.createElement("div"); ft.className = "mf"; ft.append(tstr);
+      if (mineMsg) { const tk = document.createElement("span"); tk.className = "tick"; tk.dataset.ts = m.createdAt || 0; setTick(tk); ft.append(tk); }
+      b.append(ft);
       const mb = document.createElement("button"); mb.className = "mb"; mb.type = "button"; mb.textContent = "⋯"; mb.title = "React, edit, delete";
       mb.onclick = ev => { ev.stopPropagation(); openMenu(snap.key, m, mb); };
       b.oncontextmenu = ev => { ev.preventDefault(); openMenu(snap.key, m, b); };
