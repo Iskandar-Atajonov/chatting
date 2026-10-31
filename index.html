@@ -162,7 +162,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v5</span>
+  <span>&copy; 2026 Quanta · v6</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -240,7 +240,6 @@ const firebaseConfig = {
   appId: "1:1070419381922:web:0489e389a71da0e68311fb",
   measurementId: "G-VX54VWV7J7"
 };
-
 // SHA-256 of the password (so it is not written in plain text)
 const HASH = "44e7618aae12a7704d40e40ecb765178584d7c4dd3b312350f15c6278bcf114d";
 
@@ -289,35 +288,36 @@ const squeezeVideo = file => new Promise((res, rej) => {
     v.onloadedmetadata = async () => {
       try {
         if (v.duration > 30) throw new Error("long");
-        const k = Math.min(1, 480 / Math.max(v.videoWidth, v.videoHeight)), w = (Math.round(v.videoWidth * k) >> 1) << 1, h = (Math.round(v.videoHeight * k) >> 1) << 1;
-        const c = document.createElement("canvas"); c.width = w; c.height = h; const cx = c.getContext("2d"), out = c.captureStream(24);
+        const k = Math.min(1, (v.duration <= 15 ? 960 : 720) / Math.max(v.videoWidth, v.videoHeight)), w = (Math.round(v.videoWidth * k) >> 1) << 1, h = (Math.round(v.videoHeight * k) >> 1) << 1;
+        const c = document.createElement("canvas"); c.width = w; c.height = h; const cx = c.getContext("2d"), out = c.captureStream(30);
         const ac = new (window.AudioContext || window.webkitAudioContext)(), dst = ac.createMediaStreamDestination();
         ac.createMediaElementSource(v).connect(dst); out.addTrack(dst.stream.getAudioTracks()[0]); await ac.resume();
         const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
         if (!mime) throw new Error("nosupport");
-        const rec = new MediaRecorder(out, { mimeType: mime, videoBitsPerSecond: 450000, audioBitsPerSecond: 48000 }), parts = [];
+        const rec = new MediaRecorder(out, { mimeType: mime, videoBitsPerSecond: Math.round(Math.min(2500000, Math.max(600000, 41e6 / v.duration - 96000))), audioBitsPerSecond: 96000 }), parts = [];
         rec.ondataavailable = e => e.data.size && parts.push(e.data);
         rec.onstop = () => { ac.close(); res(new Blob(parts, { type: mime.split(";")[0] })); };
-        const draw = () => { cx.drawImage(v, 0, 0, w, h); if (!v.ended) requestAnimationFrame(draw); };
+        let on = true; const stop = () => { on = false; if (rec.state !== "inactive") rec.stop(); };
+        const draw = () => { if (!on) return; cx.drawImage(v, 0, 0, w, h); requestAnimationFrame(draw); };
         rec.start(); await v.play(); draw();
-        v.onended = () => setTimeout(() => rec.stop(), 250);
-        setTimeout(() => { if (rec.state !== "inactive") rec.stop(); }, (v.duration + 4) * 1000);
+        v.onended = () => setTimeout(stop, 1200);
+        setTimeout(stop, (v.duration + 5) * 1000);
       } catch (e) { rej(e); }
     };
   } catch (e) { rej(e); }
 });
 async function pickVideo(f) {
   try {
-    if (f.size <= 2.5 * 1048576 && /^video\/(mp4|webm)$/.test(f.type)) vid = { url: await readURL(f), type: f.type, size: f.size };
+    if (f.size <= 4.5 * 1048576 && /^video\/(mp4|webm)$/.test(f.type)) vid = { url: await readURL(f), type: f.type, size: f.size };
     else {
       vidBusy = "Compressing video, keep this tab open…"; renderCtx();
-      const b = await squeezeVideo(f); if (b.size > 3.5 * 1048576) throw new Error("big");
+      const b = await squeezeVideo(f); if (b.size > 5.5 * 1048576) throw new Error("big");
       vid = { url: await readURL(b), type: b.type, size: b.size };
     }
     pic = null; vidBusy = ""; renderCtx();
   } catch (e) {
     vidBusy = ""; renderCtx();
-    note(e.message === "long" ? "That video is longer than 30 seconds." : e.message === "big" ? "Still too big after compression. Try a shorter clip." : "This browser could not prepare that video. Try Chrome or Edge, or a clip under 2.5 MB.");
+    note(e.message === "long" ? "That video is longer than 30 seconds." : e.message === "big" ? "Still too big after compression. Try a shorter clip." : "This browser could not prepare that video. Try Chrome or Edge, or a clip under 4.5 MB.");
   }
 }
 function setPresence(on) {
