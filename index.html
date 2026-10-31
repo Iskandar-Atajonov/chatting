@@ -109,6 +109,9 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 .quote{border-left:3px solid rgba(255,255,255,.35);background:rgba(255,255,255,.07);padding:3px 8px;border-radius:6px;margin:3px 0 5px;font-size:.8rem;cursor:pointer}
 .me .quote{border-color:rgba(0,0,0,.35);background:rgba(0,0,0,.08)}
 .pic{max-width:100%;max-height:260px;border-radius:10px;display:block;margin:4px 0;cursor:zoom-in}
+.vbtn{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.18);border-radius:12px;padding:12px 16px;cursor:pointer;color:inherit;font:inherit;margin:4px 0}
+.vbtn:hover{border-color:var(--butter)}
+.vid{max-width:100%;max-height:320px;border-radius:10px;display:block;margin:4px 0}
 .rb{opacity:0;border:0;background:none;color:#8f98c4;cursor:pointer;align-self:center;font-size:1.1rem}
 .m:hover .rb,.rb:focus{opacity:1}
 @media(hover:none){.rb{opacity:.6}}
@@ -159,7 +162,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v4</span>
+  <span>&copy; 2026 Quanta · v5</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -168,7 +171,7 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   <div id="pl" hidden></div>
   <div id="msgs"></div>
   <div id="ctx"></div>
-  <form id="send" onsubmit="return false"><button type="button" id="att" aria-label="Attach image" title="Send image">+</button><input id="file" type="file" accept="image/*" hidden><input id="txt" placeholder="Write a message" autocomplete="off"><button>Send</button></form>
+  <form id="send" onsubmit="return false"><button type="button" id="att" aria-label="Attach image or video" title="Send image or video">+</button><input id="file" type="file" accept="image/*,video/*" hidden><input id="txt" placeholder="Write a message" autocomplete="off"><button>Send</button></form>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -261,7 +264,62 @@ const square = (file, size, q) => new Promise((res, rej) => {
   img.onerror = rej; img.src = u;
 });
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
-const ago = t => { const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+let presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
+const nowMs = () => Date.now() + clockOffset;
+const ago = t => { const m = Math.max(0, Math.floor((nowMs() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.floor(m / 60) + " h ago" : Math.floor(m / 1440) + " d ago"; };
+function renderPresence() {
+  const rows = presenceRows;
+  onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
+  $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
+  const pl = $("pl"); pl.innerHTML = "";
+  rows.forEach(r => {
+    const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
+    d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === presenceUid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
+    const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t); pl.append(d);
+  });
+  document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+}
+const readURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
+// re-encode a short clip to a small WebM/MP4 in the browser (plays it silently while recording)
+const squeezeVideo = file => new Promise((res, rej) => {
+  try {
+    if (!window.MediaRecorder) throw new Error("nosupport");
+    const v = document.createElement("video"); v.playsInline = true; v.src = URL.createObjectURL(file);
+    v.onerror = () => rej(new Error("nosupport"));
+    v.onloadedmetadata = async () => {
+      try {
+        if (v.duration > 30) throw new Error("long");
+        const k = Math.min(1, 480 / Math.max(v.videoWidth, v.videoHeight)), w = (Math.round(v.videoWidth * k) >> 1) << 1, h = (Math.round(v.videoHeight * k) >> 1) << 1;
+        const c = document.createElement("canvas"); c.width = w; c.height = h; const cx = c.getContext("2d"), out = c.captureStream(24);
+        const ac = new (window.AudioContext || window.webkitAudioContext)(), dst = ac.createMediaStreamDestination();
+        ac.createMediaElementSource(v).connect(dst); out.addTrack(dst.stream.getAudioTracks()[0]); await ac.resume();
+        const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
+        if (!mime) throw new Error("nosupport");
+        const rec = new MediaRecorder(out, { mimeType: mime, videoBitsPerSecond: 450000, audioBitsPerSecond: 48000 }), parts = [];
+        rec.ondataavailable = e => e.data.size && parts.push(e.data);
+        rec.onstop = () => { ac.close(); res(new Blob(parts, { type: mime.split(";")[0] })); };
+        const draw = () => { cx.drawImage(v, 0, 0, w, h); if (!v.ended) requestAnimationFrame(draw); };
+        rec.start(); await v.play(); draw();
+        v.onended = () => setTimeout(() => rec.stop(), 250);
+        setTimeout(() => { if (rec.state !== "inactive") rec.stop(); }, (v.duration + 4) * 1000);
+      } catch (e) { rej(e); }
+    };
+  } catch (e) { rej(e); }
+});
+async function pickVideo(f) {
+  try {
+    if (f.size <= 2.5 * 1048576 && /^video\/(mp4|webm)$/.test(f.type)) vid = { url: await readURL(f), type: f.type, size: f.size };
+    else {
+      vidBusy = "Compressing video, keep this tab open…"; renderCtx();
+      const b = await squeezeVideo(f); if (b.size > 3.5 * 1048576) throw new Error("big");
+      vid = { url: await readURL(b), type: b.type, size: b.size };
+    }
+    pic = null; vidBusy = ""; renderCtx();
+  } catch (e) {
+    vidBusy = ""; renderCtx();
+    note(e.message === "long" ? "That video is longer than 30 seconds." : e.message === "big" ? "Still too big after compression. Try a shorter clip." : "This browser could not prepare that video. Try Chrome or Edge, or a clip under 2.5 MB.");
+  }
+}
 function setPresence(on) {
   if (!pref) return;
   const TS = firebase.database.ServerValue.TIMESTAMP, off = { name: getName(), online: false, lastSeen: TS };
@@ -272,6 +330,8 @@ const chip = (x, ...kids) => { const d = document.createElement("div"); d.classN
 const renderCtx = () => {
   const c = $("ctx"); c.innerHTML = "";
   if (replyTo) c.append(chip(() => { replyTo = null; renderCtx(); }, "Replying to " + replyTo.name + ": " + (replyTo.text || "photo").slice(0, 60)));
+  if (vidBusy) c.append(chip(() => {}, vidBusy));
+  if (vid) c.append(chip(() => { vid = null; renderCtx(); }, "Video ready (" + (vid.size / 1048576).toFixed(1) + " MB)"));
   if (pic) { const i = document.createElement("img"); i.src = pic; c.append(chip(() => { pic = null; renderCtx(); }, i)); }
 };
 const compress = (file, max, q) => new Promise((res, rej) => {
@@ -316,20 +376,15 @@ function startChat() {
       rows.sort((a, b) => (a.ts || 0) - (b.ts || 0)); photos = {}; rows.forEach(v => photos[v.name] = v.photo);
       document.querySelectorAll(".av,.pa").forEach(a => paintAv(a, a.dataset.n)); paintMe();
     }, () => {});
+    presenceUid = uid;
+    db.ref(".info/serverTimeOffset").on("value", o => { clockOffset = o.val() || 0; renderPresence(); });
     db.ref("presence").on("value", snap => {
       const rows = [];
-      snap.forEach(c => { const v = c.val(); if (v && v.name && Date.now() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
+      snap.forEach(c => { const v = c.val(); if (v && v.name && nowMs() - v.lastSeen < 6048e5) rows.push({ id: c.key, ...v }); });
       rows.sort((a, b) => (b.online - a.online) || (b.lastSeen - a.lastSeen));
-      onlineNames = new Set(rows.filter(r => r.online).map(r => r.name));
-      $("pb").textContent = "● " + rows.filter(r => r.online).length + " online";
-      const pl = $("pl"); pl.innerHTML = "";
-      rows.forEach(r => {
-        const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
-        d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === uid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
-        const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t); pl.append(d);
-      });
-      document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
+      presenceRows = rows; renderPresence();
     });
+    setInterval(renderPresence, 15000);
     db.ref(".info/connected").on("value", c => { $("st").textContent = c.val() ? "● connected to database" : "● not connected"; $("st").className = c.val() ? "ok" : "bad"; });
     $("msgs").innerHTML = '<div class="empty">No messages yet. Say hello.</div>';
     db.ref("messages").orderByChild("createdAt").on("child_added", snap => {
@@ -355,6 +410,20 @@ function startChat() {
         i.onclick = () => { $("lbi").src = m.image; $("lb").classList.add("on"); };
         b.append(i);
       }
+      if (m.video && m.video.id) {
+        const vb = document.createElement("button"); vb.type = "button"; vb.className = "vbtn";
+        vb.textContent = "▶ Play video" + (m.video.size ? " (" + (m.video.size / 1048576).toFixed(1) + " MB)" : "");
+        vb.onclick = async () => {
+          vb.textContent = "Loading…";
+          try {
+            const sn = await db.ref("media/" + m.video.id).once("value"), x = sn.val();
+            if (!x || !/^data:video\/(webm|mp4);base64,[A-Za-z0-9+\/=]+$/.test(String(x.data))) throw new Error("bad");
+            const blob = await (await fetch(x.data)).blob(), pv = document.createElement("video");
+            pv.className = "vid"; pv.controls = true; pv.autoplay = true; pv.playsInline = true; pv.src = URL.createObjectURL(blob); vb.replaceWith(pv);
+          } catch (e) { vb.textContent = "Video unavailable. Tap to retry."; }
+        };
+        b.append(vb);
+      }
       if (m.text) b.append(document.createTextNode(m.text));
       const rb = document.createElement("button"); rb.className = "rb"; rb.type = "button"; rb.textContent = "↩"; rb.title = "Reply";
       rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || ""}; renderCtx(); $("txt").focus(); };
@@ -379,11 +448,12 @@ $("nm").addEventListener("change", () => setPresence(chatOpen));
 $("att").onclick = () => $("file").click();
 $("file").onchange = async () => {
   const f = $("file").files[0]; $("file").value = ""; if (!f) return;
+  if (f.type.startsWith("video/")) return pickVideo(f);
   try {
     let d = await compress(f, 1000, .65);
     if (d.length > 300000) d = await compress(f, 700, .5);
     if (d.length > 300000) return note("That image is too large.");
-    pic = d; renderCtx();
+    pic = d; vid = null; renderCtx();
   } catch (e) { note("Could not read that image."); }
 };
 $("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); paintMe(); });
@@ -415,14 +485,15 @@ $("send").addEventListener("submit", async e => {
     else note("Wrong admin password.");
     return;
   }
-  if ((!text && !pic) || !db) return;
+  if ((!text && !pic && !vid) || !db) return;
   $("txt").value = "";
   const data = { name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
   if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
   if (pic) data.image = pic;
-  replyTo = null; pic = null; renderCtx();
-  const warn = setTimeout(() => $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not saved yet. Check: 1) your config values, 2) the databaseURL is exactly the one shown in Realtime Database, 3) the rules are published.</div>'), 6000);
-  try { await db.ref("messages").push(data); clearTimeout(warn); }
+  const v = vid; if (v) data.video = { id: db.ref("media").push().key, size: v.size };
+  replyTo = null; pic = null; vid = null; renderCtx();
+  const warn = setTimeout(() => $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not saved yet. Check: 1) your config values, 2) the databaseURL is exactly the one shown in Realtime Database, 3) the rules are published.</div>'), v ? 90000 : 6000);
+  try { if (v) await db.ref("media/" + data.video.id).set({ data: v.url, type: v.type }); await db.ref("messages").push(data); clearTimeout(warn); }
   catch (err) { $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not sent (' + err.code + ')</div>'); }
 });
 </script>
