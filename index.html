@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <title>Quanta | Quantum physics, explained</title>
 <link rel="icon" href="data:,">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -186,6 +188,61 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
 .rnd{width:220px;height:220px;max-width:68vw;max-height:68vw;border-radius:50%;object-fit:cover;display:grid;place-items:center;cursor:pointer;border:2px solid rgba(124,240,255,.4);background:radial-gradient(circle at 30% 30%,#2a3470,#10163a);margin:4px 0;color:#e8ecff;font-size:2.2rem;position:relative}
 .rnd span{position:absolute;bottom:16px;font-size:.8rem}
 </style>
+<style id="v12">
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,rgba(124,240,255,.5),rgba(167,139,250,.5));border-radius:10px;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#7cf0ff,#a78bfa);border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
+@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:rgba(124,240,255,.45) transparent}}
+body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,body.chatting footer{visibility:hidden}
+#msgs,#send,#typ,#ctx{max-width:none!important;margin:0!important}
+#msgs{padding:22px clamp(14px,3vw,44px);background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:24px 24px}
+#typ,#ctx{padding-left:clamp(14px,3vw,44px);padding-right:clamp(14px,3vw,44px)}
+#send{align-items:center;padding:12px clamp(14px,3vw,44px) 22px}
+.pill{height:54px}
+#send #go{width:54px;height:54px}
+.m{max-width:min(78%,680px)}
+#top b{background:linear-gradient(120deg,#fff,#7cf0ff,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.35rem}
+.bub.noBg{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+.me .bub.noBg small,.me .bub.noBg .tick{color:#8f98c4}
+.bub a{color:inherit;text-decoration:underline;text-underline-offset:2px;word-break:break-all}
+.m:not(.me) .bub a{color:#7cf0ff}
+.tick{margin-left:2px;font-weight:700;letter-spacing:-2px}
+.me .tick{color:rgba(8,16,42,.5)}
+.me .tick.read{color:#0a2a8a}
+.pr{padding:9px 10px;border-radius:12px}
+.pr:hover{background:rgba(255,255,255,.05)}
+.pa{width:34px;height:34px;font-size:.9rem}
+@media(min-width:900px){
+  #chat{display:grid;grid-template-columns:310px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto auto auto;grid-template-areas:"side top" "side msgs" "side typ" "side ctx" "side send"}
+  #top{grid-area:top}#msgs{grid-area:msgs;min-height:0}#typ{grid-area:typ}#ctx{grid-area:ctx}#send{grid-area:send}
+  #pl,#pl[hidden]{display:block!important;grid-area:side;position:static;top:auto;left:auto;min-width:0;max-height:none;border-radius:0;border:0;border-right:1px solid var(--line);background:rgba(8,12,32,.78);backdrop-filter:blur(14px);padding:18px 12px;box-shadow:none}
+  #pl::before{content:"Members";display:block;font-family:"Space Grotesk",sans-serif;font-size:1.15rem;font-weight:700;padding:4px 10px 14px;color:#e8ecff}
+  #pb{display:none!important}
+  #ep{left:calc(310px + (100% - 310px) / 2)}
+}
+</style>
+<style id="v13">
+#ep{display:flex;flex-direction:column;padding:0;overflow:hidden;width:min(94vw,460px);max-height:380px}
+.eptabs{display:flex;gap:4px;padding:8px 8px 4px;border-bottom:1px solid var(--line)}
+#ep .eptabs button{flex:1;font-size:.85rem;padding:7px 4px;border-radius:999px;color:#8f98c4;cursor:pointer;font-family:inherit}
+#ep .eptabs button.on{background:rgba(124,240,255,.15);color:#7cf0ff}
+#gq{margin:8px;padding:9px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:#0b1030;color:inherit;font:inherit;outline:none}
+#gq[hidden]{display:none}
+#epb{overflow-y:auto;padding:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px;flex:1;min-height:0}
+#epb.st{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))}
+#epb.st button{font-size:2.6rem;padding:4px 0}
+#epb.gf{grid-template-columns:repeat(2,1fr);gap:6px}
+#epb.gf img{width:100%;border-radius:10px;cursor:pointer;display:block}
+#epb.nt{display:block;padding:18px;color:#8f98c4;font-size:.9rem;line-height:1.5}
+.stk{font-size:92px;line-height:1.05;animation:stkpop .35s cubic-bezier(.2,1.4,.4,1);filter:drop-shadow(0 8px 14px rgba(0,0,0,.4))}
+@keyframes stkpop{from{transform:scale(.4);opacity:0}}
+.gifimg{max-width:min(260px,70vw);border-radius:14px;display:block;margin:4px 0}
+.gifph{width:200px;height:130px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.06);color:#8f98c4;font-weight:600}
+.exp{font-size:.8rem;font-style:italic;opacity:.7;margin-top:4px}
+#cl[hidden]{display:none}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
@@ -226,17 +283,17 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v11</span>
+  <span>&copy; 2026 Quanta · v13</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
 <div id="chat" aria-hidden="true">
-  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><button id="rf" type="button" hidden>↻ Refresh all</button><div id="meav" class="av" role="button" tabindex="0" title="Click to change your profile photo (Shift+click removes it)"></div><input id="pf" type="file" accept="image/*" hidden><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
+  <div id="top"><div><b>Chat</b><span id="st">connecting…</span><button id="pb" type="button">● 0 online</button></div><div><button id="cl" type="button" hidden>🧹 Clean media</button><button id="rf" type="button" hidden>↻ Refresh all</button><div id="meav" class="av" role="button" tabindex="0" title="Click to change your profile photo (Shift+click removes it)"></div><input id="pf" type="file" accept="image/*" hidden><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
   <div id="pl" hidden></div>
   <div id="msgs"></div>
   <div id="typ"></div>
   <div id="ctx"></div>
-  <div id="ep" hidden></div>
+  <div id="ep" hidden><div class="eptabs"><button type="button" data-t="e">Emoji</button><button type="button" data-t="s">Stickers</button><button type="button" data-t="g">GIFs</button></div><input id="gq" placeholder="Search GIFs" hidden autocomplete="off"><div id="epb"></div></div>
   <form id="send" onsubmit="return false"><div class="pill">
     <button type="button" class="ib" id="emo" aria-label="Emoji" title="Emoji"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></button>
     <input id="txt" placeholder="Message" autocomplete="off">
@@ -259,10 +316,10 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
   try {
     const T = window.THREE, cv = document.getElementById("bg");
     const r = new T.WebGLRenderer({canvas: cv, antialias: true, alpha: true});
-    r.setPixelRatio(Math.min(devicePixelRatio, 2));
+    r.setPixelRatio(Math.min(devicePixelRatio, 1.5));
     const sc = new T.Scene(), cam = new T.PerspectiveCamera(55, 1, .1, 100); cam.position.z = 12;
     const g = new T.Group(); sc.add(g);
-    const N = 3000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T.Color("#7cf0ff"), c2 = new T.Color("#a78bfa");
+    const N = innerWidth < 700 ? 1400 : 2600, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), c1 = new T.Color("#7cf0ff"), c2 = new T.Color("#a78bfa");
     for (let i = 0; i < N; i++) {
       const rad = 2 + Math.pow(Math.random(), .6) * 10, th = Math.random() * 6.283, ph = Math.acos(2 * Math.random() - 1);
       pos.set([rad * Math.sin(ph) * Math.cos(th), rad * Math.sin(ph) * Math.sin(th) * .7, rad * Math.cos(ph)], i * 3);
@@ -286,13 +343,17 @@ footer{border-top:1px solid var(--line);background:rgba(5,6,15,.6);backdrop-filt
     let mx = 0, my = 0; addEventListener("pointermove", e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
     const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const tick = t => {
+      if (!window.__bgOn || document.hidden) { running = false; return; }
       t *= .001;
       els.forEach(o => { const a = t * o.s + o.p; o.e.position.set(Math.cos(a) * o.R, 0, Math.sin(a) * o.R * .8); });
       g.rotation.y += (t * .12 + mx * .8 - g.rotation.y) * .04;
       g.rotation.x += (my * .5 + scrollY * .0007 - g.rotation.x) * .04;
       pts.rotation.y = t * .03; cam.position.z = 12 + Math.min(scrollY, 1500) * .003;
-      r.render(sc, cam); if (!still) requestAnimationFrame(tick);
+      r.render(sc, cam); if (!still) requestAnimationFrame(tick); else running = false;
     };
+    let running = true; window.__bgOn = true;
+    window.__bgSet = on => { window.__bgOn = on; if (on && !running) { running = true; requestAnimationFrame(tick); } };
+    document.addEventListener("visibilitychange", () => { if (!document.hidden && window.__bgOn && !running) { running = true; requestAnimationFrame(tick); } });
     requestAnimationFrame(tick);
   } catch (e) { console.warn("3D background unavailable", e); }
 })();
@@ -317,6 +378,11 @@ const firebaseConfig = {
   measurementId: "G-VX54VWV7J7"
 };
 
+// Optional: free GIPHY API key for GIF search (get one at developers.giphy.com). Leave empty to hide GIF search.
+const GIPHY_KEY = "";
+// Media (photos, videos, voice, GIFs) older than this many days is removed by the admin cleanup
+const CLEAN_DAYS = 30;
+
 // SHA-256 of the password (so it is not written in plain text)
 const HASH = "44e7618aae12a7704d40e40ecb765178584d7c4dd3b312350f15c6278bcf114d";
 
@@ -340,7 +406,7 @@ const square = (file, size, q) => new Promise((res, rej) => {
   img.onerror = rej; img.src = u;
 });
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
-let rnd = null, rvStream = null, rvRec = null, rvChunks = [], rvT0 = 0, rvTimer = null, rvFacing = "user", rvCancel = false, lastDay = "", typers = [], lastTyping = 0, typingTimer = null, rec = null, recChunks = [], recT0 = 0, recTimer = null, recStream = null, voice = null, curAudio = null, editing = null, presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
+let gifUp = null, stk = null, gifSel = null, epTab = "e", gqTimer = null, rnd = null, rvStream = null, rvRec = null, rvChunks = [], rvT0 = 0, rvTimer = null, rvFacing = "user", rvCancel = false, lastDay = "", typers = [], lastTyping = 0, typingTimer = null, rec = null, recChunks = [], recT0 = 0, recTimer = null, recStream = null, voice = null, curAudio = null, editing = null, presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
 const nowMs = () => Date.now() + clockOffset;
 const ago = t => { const m = Math.max(0, Math.floor((nowMs() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.floor(m / 60) + " h ago" : Math.floor(m / 1440) + " d ago"; };
 function renderPresence() {
@@ -382,7 +448,7 @@ async function toggleRec() {
       rec = null; $("mic").classList.remove("rec"); renderCtx();
       if (cancelled || dur < 1) return;
       const blob = new Blob(chunks, { type });
-      voice = { url: await readURL(blob), type, dur, size: blob.size };
+      voice = { blob, type, dur, size: blob.size };
       $("send").dispatchEvent(new Event("submit", { cancelable: true }));
     };
     recT0 = Date.now(); rec.start(); $("mic").classList.add("rec");
@@ -390,27 +456,38 @@ async function toggleRec() {
   } catch (e) { rec = null; note("Microphone not available. Allow microphone access in your browser."); }
 }
 const CH = 3000000;
-async function putMedia(id, url, type) {
-  const n = Math.ceil(url.length / CH);
+const SL = 2100000;
+const slice64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = rej; r.readAsDataURL(b); });
+async function putMedia(id, blob, type) {
+  const n = Math.max(1, Math.ceil(blob.size / SL)); let done = 0;
   try {
-    for (let i = 0; i < n; i++) {
-      if (n > 2) { vidBusy = "Uploading " + Math.round(i / n * 100) + "%…"; renderCtx(); }
-      await db.ref("media/" + id + "/c/p" + String(i).padStart(4, "0")).set(url.slice(i * CH, (i + 1) * CH));
+    for (let i = 0; i < n; i += 4) {
+      await Promise.all([...Array(Math.min(4, n - i)).keys()].map(async j => {
+        const k = i + j, part = await slice64(blob.slice(k * SL, (k + 1) * SL));
+        await db.ref("media/" + id + "/c/p" + String(k).padStart(5, "0")).set(part);
+        done++; if (n > 2) { vidBusy = "Uploading " + Math.round(done / n * 100) + "%…"; renderCtx(); }
+      }));
     }
-    await db.ref("media/" + id + "/meta").set({ n, type });
+    await db.ref("media/" + id + "/meta").set({ n, type, v: 2, size: blob.size });
   } finally { vidBusy = ""; renderCtx(); }
 }
-async function getMedia(id) {
-  const x = (await db.ref("media/" + id).once("value")).val();
-  if (!x) throw new Error("gone");
-  if (typeof x.data === "string") return x.data;
-  return Object.keys(x.c || {}).sort().map(k => x.c[k]).join("");
+const b64 = t => { const bin = atob(t), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; };
+async function getMediaBlob(id) {
+  const base = db.ref("media/" + id), meta = (await base.child("meta").once("value")).val();
+  if (meta && meta.v === 2) {
+    const keys = Array.from({ length: meta.n }, (_, k) => "p" + String(k).padStart(5, "0")), out = new Array(meta.n);
+    for (let i = 0; i < keys.length; i += 4) await Promise.all(keys.slice(i, i + 4).map(async (k, j) => { out[i + j] = b64((await base.child("c/" + k).once("value")).val() || ""); }));
+    return new Blob(out, { type: meta.type });
+  }
+  const x = (await base.once("value")).val(); if (!x) throw new Error("gone");
+  const u = typeof x.data === "string" ? x.data : Object.keys(x.c || {}).sort().map(k => x.c[k]).join("");
+  return await (await fetch(u)).blob();
 }
-function updateGo() { $("go").hidden = !($("txt").value.trim() || pic || vid || voice || rnd || editing); }
+function updateGo() { $("go").hidden = !($("txt").value.trim() || pic || vid || voice || rnd || gifUp || editing); }
 async function rvStart() {
   if (rvStream) rvStream.getTracks().forEach(t => t.stop());
   try {
-    rvStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: rvFacing, width: { ideal: 480 }, height: { ideal: 480 } }, audio: true });
+    rvStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: rvFacing, width: { ideal: 640 }, height: { ideal: 640 }, frameRate: { ideal: 30 } }, audio: true });
     const p = $("rvp"); p.srcObject = rvStream; p.style.transform = rvFacing === "user" ? "scaleX(-1)" : ""; p.play();
   } catch (e) { rvClose(); note("Camera or microphone not available. Allow access in your browser."); }
 }
@@ -419,6 +496,27 @@ function rvClose() {
   if (rvRec && rvRec.state !== "inactive") { rvCancel = true; rvRec.stop(); }
   if (rvStream) rvStream.getTracks().forEach(t => t.stop());
   rvStream = null; rvRec = null; $("rv").hidden = true; $("rvr").classList.remove("on"); $("rvt").textContent = "0:00";
+}
+const active = () => chatOpen && !document.hidden && document.hasFocus();
+let readsMap = {}, latestTs = 0, myReadTs = 0, readTimer = null;
+const readersFor = ts => Object.entries(readsMap).filter(([u, r]) => u !== myUid() && r.ts >= ts).map(([, r]) => r.name);
+const setTick = tk => { const rs = readersFor(+tk.dataset.ts); tk.textContent = rs.length ? "✓✓" : "✓"; tk.classList.toggle("read", rs.length > 0); tk.title = rs.length ? "Seen by " + rs.join(", ") : "Sent"; };
+const refreshTicks = () => document.querySelectorAll(".tick").forEach(setTick);
+function markRead() { if (!db || !active() || latestTs <= myReadTs) return; myReadTs = latestTs; db.ref("reads/" + myUid()).set({ name: getName(), ts: latestTs }); }
+function scheduleRead() { clearTimeout(readTimer); readTimer = setTimeout(markRead, 500); }
+const syncPresence = () => { if (db) setPresence(active()); scheduleRead(); };
+document.addEventListener("visibilitychange", syncPresence); addEventListener("focus", syncPresence); addEventListener("blur", syncPresence);
+addEventListener("pagehide", () => { if (db) setPresence(false); });
+const URLRE = /(https?:\/\/[^\s<]+|www\.[^\s<]+)/gi;
+function linkify(text) {
+  const f = document.createDocumentFragment(); let last = 0, m; URLRE.lastIndex = 0;
+  while ((m = URLRE.exec(text))) {
+    let u = m[0]; const t = u.match(/[.,!?;:)\]]+$/); if (t) u = u.slice(0, -t[0].length);
+    f.append(text.slice(last, m.index));
+    const a = document.createElement("a"); a.textContent = u; a.href = /^https?:\/\//i.test(u) ? u : "https://" + u; a.target = "_blank"; a.rel = "noopener noreferrer"; f.append(a);
+    last = m.index + u.length; URLRE.lastIndex = last;
+  }
+  f.append(text.slice(last)); return f;
 }
 const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 const myUid = () => localStorage.getItem("chatUid");
@@ -434,7 +532,7 @@ function openMenu(key, m, anchor) {
     act("✎ Edit", () => { editing = { key, media: !!(m.image || m.video) }; $("txt").value = m.text || ""; renderCtx(); $("txt").focus(); mm.hidden = true; });
     const d = act("🗑 Delete", () => {
       if (!d.dataset.arm) { d.dataset.arm = "1"; d.textContent = "Tap again to delete"; return; }
-      db.ref("messages/" + key).remove(); if (m.video && m.video.id) db.ref("media/" + m.video.id).remove(); if (m.voice && m.voice.id) db.ref("media/" + m.voice.id).remove(); if (m.round && m.round.id) db.ref("media/" + m.round.id).remove(); mm.hidden = true;
+      db.ref("messages/" + key).remove(); if (m.video && m.video.id) db.ref("media/" + m.video.id).remove(); if (m.voice && m.voice.id) db.ref("media/" + m.voice.id).remove(); if (m.round && m.round.id) db.ref("media/" + m.round.id).remove(); if (m.agif && m.agif.id) db.ref("media/" + m.agif.id).remove(); mm.hidden = true;
     }, "danger");
   }
   mm.hidden = false;
@@ -443,48 +541,9 @@ function openMenu(key, m, anchor) {
   mm.style.top = (r.bottom + h + 8 > innerHeight ? Math.max(8, r.top - h - 6) : r.bottom + 6) + "px";
 }
 const readURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
-// re-encode a short clip to a small WebM/MP4 in the browser (plays it silently while recording)
-const squeezeVideo = file => new Promise((res, rej) => {
-  try {
-    if (!window.MediaRecorder) throw new Error("nosupport");
-    const v = document.createElement("video"); v.playsInline = true; v.src = URL.createObjectURL(file);
-    v.onerror = () => rej(new Error("nosupport"));
-    v.onloadedmetadata = async () => {
-      try {
-        const k = Math.min(1, (v.duration <= 15 ? 960 : v.duration <= 120 ? 720 : 480) / Math.max(v.videoWidth, v.videoHeight)), w = (Math.round(v.videoWidth * k) >> 1) << 1, h = (Math.round(v.videoHeight * k) >> 1) << 1;
-        const c = document.createElement("canvas"); c.width = w; c.height = h; const cx = c.getContext("2d"), out = c.captureStream(30);
-        const ac = new (window.AudioContext || window.webkitAudioContext)(), dst = ac.createMediaStreamDestination();
-        ac.createMediaElementSource(v).connect(dst); out.addTrack(dst.stream.getAudioTracks()[0]); await ac.resume();
-        const mime = ["video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
-        if (!mime) throw new Error("nosupport");
-        const rec = new MediaRecorder(out, { mimeType: mime, videoBitsPerSecond: Math.round(Math.min(2500000, Math.max(250000, 240e6 / v.duration - 96000))), audioBitsPerSecond: 96000 }), parts = [];
-        rec.ondataavailable = e => e.data.size && parts.push(e.data);
-        rec.onstop = () => { ac.close(); res(new Blob(parts, { type: mime.split(";")[0] })); };
-        let on = true; const stop = () => { on = false; if (rec.state !== "inactive") rec.stop(); };
-        const draw = () => { if (!on) return; cx.drawImage(v, 0, 0, w, h); requestAnimationFrame(draw); };
-        if (v.readyState < 2) await new Promise(r => v.addEventListener("loadeddata", r, { once: true }));
-        draw(); rec.start();
-        await new Promise(r => setTimeout(r, 900)); // let the picture start recording before the sound begins
-        await v.play();
-        v.onended = () => setTimeout(stop, 1200);
-        setTimeout(stop, (v.duration + 7) * 1000);
-      } catch (e) { rej(e); }
-    };
-  } catch (e) { rej(e); }
-});
-async function pickVideo(f) {
-  try {
-    if (f.size <= 40 * 1048576 && /^video\/(mp4|webm)$/.test(f.type)) vid = { url: await readURL(f), type: f.type, size: f.size };
-    else {
-      vidBusy = "Compressing video, keep this tab open…"; renderCtx();
-      const b = await squeezeVideo(f); if (b.size > 80 * 1048576) throw new Error("big");
-      vid = { url: await readURL(b), type: b.type, size: b.size };
-    }
-    pic = null; vidBusy = ""; renderCtx();
-  } catch (e) {
-    vidBusy = ""; renderCtx();
-    note(e.message === "big" ? "Still too big for the free database after compression (over 80 MB)." : "This browser could not prepare that video. Try Chrome or Edge, or a clip under 40 MB.");
-  }
+function pickVideo(f) {
+  if (f.size > 150 * 1048576) return note("That video is over 150 MB, which is too big for the free database.");
+  vid = { blob: f, type: f.type || "video/mp4", size: f.size }; pic = null; gifUp = null; renderCtx();
 }
 function setPresence(on) {
   if (!pref) return;
@@ -498,6 +557,7 @@ const renderCtx = () => {
   if (replyTo) c.append(chip(() => { replyTo = null; renderCtx(); }, "Replying to " + replyTo.name + ": " + (replyTo.text || "attachment").slice(0, 60)));
   if (rec) c.append(chip(() => rec && rec.cancel(), "● Recording " + fmt((Date.now() - recT0) / 1000) + " (tap the mic to send)"));
   if (editing) c.append(chip(() => { editing = null; $("txt").value = ""; renderCtx(); }, "Editing message"));
+  if (gifUp) c.append(chip(() => { gifUp = null; renderCtx(); }, "GIF ready (" + (gifUp.size / 1048576).toFixed(1) + " MB)"));
   if (vidBusy) c.append(chip(() => {}, vidBusy));
   if (vid) c.append(chip(() => { vid = null; renderCtx(); }, "Video ready (" + (vid.size / 1048576).toFixed(1) + " MB)"));
   if (pic) { const i = document.createElement("img"); i.src = pic; c.append(chip(() => { pic = null; renderCtx(); }, i)); }
@@ -518,8 +578,13 @@ function initDb() {
   firebase.initializeApp(firebaseConfig);
   return (db = firebase.database());
 }
-const refreshBtn = () => { $("rf").hidden = localStorage.getItem("chatAdmin") !== "1"; };
+const refreshBtn = () => { $("rf").hidden = $("cl").hidden = localStorage.getItem("chatAdmin") !== "1"; };
 refreshBtn();
+$("cl").onclick = () => {
+  const b = $("cl");
+  if (b.dataset.arm) { clearTimeout(+b.dataset.arm); delete b.dataset.arm; b.textContent = "🧹 Clean media"; if (db) cleanOldMedia(true).catch(e => note("Cleanup failed (" + (e.code || "error") + ")")); return; }
+  b.textContent = "Sure? Click again"; b.dataset.arm = setTimeout(() => { delete b.dataset.arm; b.textContent = "🧹 Clean media"; }, 4000);
+};
 $("rf").onclick = () => {
   const b = $("rf");
   if (b.dataset.arm) { clearTimeout(+b.dataset.arm); delete b.dataset.arm; b.textContent = "↻ Refresh all"; if (db) db.ref("control/reload").set(firebase.database.ServerValue.TIMESTAMP); return; }
@@ -538,7 +603,7 @@ function startChat() {
     const uid = localStorage.getItem("chatUid") || ((crypto.randomUUID && crypto.randomUUID()) || Date.now() + "" + Math.random().toString(36).slice(2));
     localStorage.setItem("chatUid", uid);
     pref = db.ref("presence/" + uid);
-    db.ref(".info/connected").on("value", c => { if (c.val()) { setPresence(chatOpen); db.ref("typing/" + uid).onDisconnect().remove(); } });
+    db.ref(".info/connected").on("value", c => { if (c.val()) { setPresence(active()); db.ref("typing/" + uid).onDisconnect().remove(); } });
     db.ref("profiles").on("value", sn => {
       const rows = []; sn.forEach(c => { const v = c.val(); if (v && v.name && OKP.test(String(v.photo)) && v.photo.length < 60000) rows.push(v); });
       rows.sort((a, b) => (a.ts || 0) - (b.ts || 0)); photos = {}; rows.forEach(v => photos[v.name] = v.photo);
@@ -563,8 +628,9 @@ function startChat() {
       el.className = "m" + (m.name === me ? " me" : "");
       const av = document.createElement("div"); av.className = "av"; av.dataset.n = m.name; paintAv(av, m.name); if (onlineNames.has(m.name)) av.classList.add("on");
       const b = document.createElement("div"); b.className = "bub";
-      const s = document.createElement("small"); if (m.name !== me) s.style.color = colorOf(String(m.name));
+      const s = document.createElement("small"); if (m.name !== me) s.style.color = colorOf(String(m.name)); const mineMsg = m.uid ? m.uid === myUid() : m.name === me; if (m.createdAt > latestTs) latestTs = m.createdAt;
       s.textContent = m.name + " · " + new Date(m.createdAt).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) + (m.edited ? " · edited" : "");
+      if (mineMsg) { const tk = document.createElement("span"); tk.className = "tick"; tk.dataset.ts = m.createdAt || 0; setTick(tk); s.append(" ", tk); }
       const stick = near || m.name === me;
       el.id = "m-" + snap.key; b.append(s);
       if (m.reply) {
@@ -573,7 +639,7 @@ function startChat() {
         b.append(q);
       }
       if (typeof m.image === "string" && m.image.startsWith("data:image/")) {
-        const i = document.createElement("img"); i.className = "pic"; i.src = m.image;
+        const i = document.createElement("img"); i.className = "pic"; i.decoding = "async"; i.src = m.image;
         i.onload = () => { if (stick) box.scrollTop = box.scrollHeight; };
         i.onclick = () => { $("lbi").src = m.image; $("lb").classList.add("on"); };
         b.append(i);
@@ -584,23 +650,31 @@ function startChat() {
         vb.onclick = async () => {
           vb.textContent = "Loading…";
           try {
-            const u = await getMedia(m.video.id);
-            if (!/^data:video\/(webm|mp4);base64,/.test(u.slice(0, 40))) throw new Error("bad");
-            const blob = await (await fetch(u)).blob(), pv = document.createElement("video");
+            const blob = await getMediaBlob(m.video.id); if (!/^video\//.test(blob.type)) throw new Error("bad");
+            const pv = document.createElement("video");
             pv.className = "vid"; pv.controls = true; pv.autoplay = true; pv.playsInline = true; pv.src = URL.createObjectURL(blob); vb.replaceWith(pv);
           } catch (e) { vb.textContent = "Video unavailable. Tap to retry."; }
         };
         b.append(vb);
       }
+      if (m.sticker) { b.classList.add("noBg"); const k = document.createElement("div"); k.className = "stk"; k.textContent = String(m.sticker).slice(0, 8); b.append(k); }
+      if (m.gif && /^https:\/\/media\d*\.giphy\.com\//.test(String(m.gif.url))) {
+        b.classList.add("noBg"); const g = document.createElement("img"); g.className = "gifimg"; g.alt = "GIF"; g.src = m.gif.url; g.onload = () => { if (stick) box.scrollTop = box.scrollHeight; }; b.append(g);
+      }
+      if (m.agif && m.agif.id) {
+        b.classList.add("noBg"); const ph = document.createElement("div"); ph.className = "gifph"; ph.textContent = "GIF"; b.append(ph);
+        const ob = new IntersectionObserver(es => { if (!es[0].isIntersecting) return; ob.disconnect(); getMediaBlob(m.agif.id).then(bl => { if (!/^image\//.test(bl.type)) throw 0; const g = document.createElement("img"); g.className = "gifimg"; g.src = URL.createObjectURL(bl); g.onload = () => { if (stick) box.scrollTop = box.scrollHeight; }; ph.replaceWith(g); }).catch(() => { ph.textContent = "GIF unavailable"; }); });
+        ob.observe(ph);
+      }
       if (m.round && m.round.id) {
-        const rd = document.createElement("div"); rd.className = "rnd"; rd.textContent = "▶";
+        b.classList.add("noBg"); const rd = document.createElement("div"); rd.className = "rnd"; rd.textContent = "▶";
         const rl = document.createElement("span"); rl.textContent = fmt(m.round.dur || 0); rd.append(rl);
         rd.onclick = async () => {
           if (rd.dataset.ld) return; rd.dataset.ld = "1"; rl.textContent = "Loading…";
           try {
-            const u = await getMedia(m.round.id); if (!/^data:video\/(webm|mp4);base64,/.test(u.slice(0, 40))) throw new Error("bad");
+            const bl = await getMediaBlob(m.round.id); if (!/^video\//.test(bl.type)) throw new Error("bad");
             const pv = document.createElement("video"); pv.className = "rnd"; pv.playsInline = true; pv.autoplay = true;
-            pv.src = URL.createObjectURL(await (await fetch(u)).blob()); pv.onclick = () => pv.paused ? pv.play() : pv.pause(); rd.replaceWith(pv);
+            pv.src = URL.createObjectURL(bl); pv.onclick = () => pv.paused ? pv.play() : pv.pause(); rd.replaceWith(pv);
           } catch (e) { rd.dataset.ld = ""; rl.textContent = "Unavailable, tap to retry"; }
         };
         b.append(rd);
@@ -613,8 +687,8 @@ function startChat() {
         pb.onclick = async () => {
           try {
             if (!au) {
-              pb.textContent = "…"; const u = await getMedia(m.voice.id); if (!/^data:audio\/(webm|mp4|ogg);base64,/.test(u.slice(0, 40))) throw new Error("bad");
-              au = new Audio(URL.createObjectURL(await (await fetch(u)).blob()));
+              pb.textContent = "…"; const bl = await getMediaBlob(m.voice.id); if (!/^audio\//.test(bl.type)) throw new Error("bad");
+              au = new Audio(URL.createObjectURL(bl));
               au.ontimeupdate = () => { const d = (isFinite(au.duration) && au.duration) || m.voice.dur || 1; fill.style.width = Math.min(100, au.currentTime / d * 100) + "%"; tm.textContent = fmt(au.currentTime); };
               au.onplay = () => { pb.textContent = "⏸"; }; au.onpause = () => { pb.textContent = "▶"; };
               au.onended = () => { fill.style.width = "0"; tm.textContent = fmt(m.voice.dur || 0); };
@@ -625,7 +699,8 @@ function startChat() {
         bar.onclick = ev => { if (au && isFinite(au.duration)) au.currentTime = ev.offsetX / bar.clientWidth * au.duration; };
         w.append(pb, bar, tm); b.append(w);
       }
-      if (m.text) b.append(document.createTextNode(m.text));
+      if (m.text) b.append(linkify(m.text));
+      if (m.expired) { const x = document.createElement("div"); x.className = "exp"; x.textContent = "Media expired (older than " + CLEAN_DAYS + " days)"; b.append(x); }
       if (m.reactions) {
         const cnt = {}; Object.entries(m.reactions).forEach(([u, e]) => (cnt[e] = cnt[e] || []).push(u));
         const row = document.createElement("div"); row.className = "rx";
@@ -641,18 +716,21 @@ function startChat() {
       const old = isChange && document.getElementById("m-" + snap.key);
       if (old) old.replaceWith(el); else { addDay(m); box.append(el); }
       if (stick && !old) box.scrollTop = box.scrollHeight;
+      if (!old) scheduleRead();
     };
     const mq = db.ref("messages").orderByChild("createdAt");
     mq.on("child_added", sn => drawMsg(sn, false), err => { $("msgs").innerHTML = '<div id="note">Could not load messages (' + err.code + '). Check your Realtime Database rules.</div>'; });
     db.ref("typing").on("value", sn => { typers = []; sn.forEach(c => { const v = c.val(); if (v && c.key !== uid && v.name) typers.push(v); }); showTyping(); }, () => {});
     setInterval(showTyping, 2000);
+    db.ref("reads").on("value", sn => { readsMap = {}; sn.forEach(c => { const v = c.val(); if (v && typeof v.ts === "number") readsMap[c.key] = v; }); refreshTicks(); }, () => {});
     mq.on("child_changed", sn => drawMsg(sn, true));
     mq.on("child_removed", sn => { const o = document.getElementById("m-" + sn.key); if (o) o.remove(); });
   } catch (e) { $("msgs").innerHTML = '<div id="note">Add your Firebase config in index.html.</div>'; }
 }
 
-const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; startChat(); paintMe(); setPresence(true); setTimeout(() => $("txt").focus(), 500); };
-const close = () => { chatOpen = false; setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
+const open = () => { $("nm").value = localStorage.getItem("chatName") || ""; $("chat").classList.add("open"); $("chat").setAttribute("aria-hidden", "false"); chatOpen = true; document.body.classList.add("chatting"); window.__bgSet && window.__bgSet(false); startChat(); paintMe(); setPresence(true); scheduleRead();
+  if (localStorage.getItem("chatAdmin") === "1" && Date.now() - (+localStorage.getItem("lastClean") || 0) > 432e5) setTimeout(() => { if (db) cleanOldMedia(false).catch(() => {}); }, 5000); setTimeout(() => $("txt").focus(), 500); };
+const close = () => { chatOpen = false; document.body.classList.remove("chatting"); window.__bgSet && window.__bgSet(true); setPresence(false); $("pl").hidden = true; $("chat").classList.remove("open"); $("chat").setAttribute("aria-hidden", "true"); };
 
 $("gate").addEventListener("submit", async e => {
   e.preventDefault();
@@ -662,17 +740,53 @@ $("gate").addEventListener("submit", async e => {
 $("close").onclick = close;
 $("pb").onclick = e => { e.stopPropagation(); $("pl").hidden = !$("pl").hidden; };
 addEventListener("click", e => { if (!e.target.closest("#pl")) $("pl").hidden = true; if (!e.target.closest("#mm")) $("mm").hidden = true; if (!e.target.closest("#ep") && e.target.id !== "emo") $("ep").hidden = true; });
-$("nm").addEventListener("change", () => setPresence(chatOpen));
+$("nm").addEventListener("change", () => setPresence(active()));
 $("att").onclick = () => $("file").click();
 $("txt").addEventListener("input", () => {
   if (!db) return; const t = Date.now(); clearTimeout(typingTimer); typingTimer = setTimeout(stopTyping, 4000);
   if (t - lastTyping > 2500) { lastTyping = t; db.ref("typing/" + myUid()).set({ name: getName(), ts: firebase.database.ServerValue.TIMESTAMP }); }
 });
-"😀 😃 😄 😁 😆 😅 😂 🤣 🙂 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 🤔 🤨 😐 😑 😶 🙄 😏 😴 😮 😲 😳 🥺 😢 😭 😤 😠 😡 🤯 😱 😨 😰 😓 🤗 🤭 🤫 🫡 😎 🤓 🥳 😬 🙃 😌 😔 🤤 🤢 🤮 🥶 🥵 👍 👎 👏 🙌 🙏 🤝 💪 👌 ✌️ 🤞 🤟 🤘 👋 🤙 ☝️ 👀 🧠 ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💔 💯 ✨ 🔥 ⭐ 🌟 💥 🎉 🎊 🎁 🏆 ⚡ 🌈 ☀️ 🌙 🍕 🍔 🍟 🍿 🍩 ☕ 🥤 ⚽ 🎮 🎵 🚀 🛸 🧪 🔬 ⚛️".split(" ").forEach(e => {
-  const b = document.createElement("button"); b.type = "button"; b.textContent = e;
-  b.onclick = () => { const t = $("txt"), a = t.selectionStart ?? t.value.length, z = t.selectionEnd ?? a; t.value = t.value.slice(0, a) + e + t.value.slice(z); t.focus(); t.selectionStart = t.selectionEnd = a + e.length; t.dispatchEvent(new Event("input")); };
-  $("ep").append(b);
-});
+const EMO = "😀 😃 😄 😁 😆 😅 😂 🤣 🙂 😉 😊 😇 🥰 😍 🤩 😘 😋 😛 😜 🤪 🤔 🤨 😐 😑 😶 🙄 😏 😴 😮 😲 😳 🥺 😢 😭 😤 😠 😡 🤯 😱 😨 😰 😓 🤗 🤭 🤫 🫡 😎 🤓 🥳 😬 🙃 😌 😔 🤤 🤢 🤮 🥶 🥵 👍 👎 👏 🙌 🙏 🤝 💪 👌 ✌️ 🤞 🤟 🤘 👋 🤙 ☝️ 👀 🧠 ❤️ 🧡 💛 💚 💙 💜 🖤 🤍 💔 💯 ✨ 🔥 ⭐ 🌟 💥 🎉 🎊 🎁 🏆 ⚡ 🌈 ☀️ 🌙 🍕 🍔 🍟 🍿 🍩 ☕ 🥤 ⚽ 🎮 🎵 🚀 🛸 🧪 🔬 ⚛️".split(" ");
+const STK = "🔥 ❤️ 😂 🤣 😍 🥰 😎 🤩 😭 😱 🤯 😡 🥳 🤔 😴 🙏 👏 💪 🎉 💯 ⚡ 🚀 🛸 ⚛️ 🧪 🔬 🧠 🌈 ☕ 🍕 🎮 ⚽ 🏆 👑 💎 🌙 ☀️ 🌟 👻 🐱 🐶 🦄 🐢 🦊 🤝 👀".split(" ");
+function sendQuiet() { const keep = $("txt").value; $("txt").value = ""; $("send").dispatchEvent(new Event("submit", { cancelable: true })); $("txt").value = keep; updateGo(); $("ep").hidden = true; }
+async function gifLoad(q) {
+  const body = $("epb"); body.className = "gf"; body.textContent = "Loading…";
+  try {
+    const url = "https://api.giphy.com/v1/gifs/" + (q ? "search?q=" + encodeURIComponent(q) + "&" : "trending?") + "api_key=" + encodeURIComponent(GIPHY_KEY) + "&limit=30&rating=g";
+    const j = await (await fetch(url)).json(); body.textContent = "";
+    (j.data || []).forEach(g => {
+      const im = document.createElement("img"); im.src = g.images.fixed_width_small.url; im.alt = g.title || "GIF"; im.loading = "lazy";
+      im.onclick = () => { const f = g.images.fixed_height; gifSel = { url: f.url, w: +f.width, h: +f.height }; sendQuiet(); }; body.append(im);
+    });
+    if (!(j.data || []).length) { body.className = "nt"; body.textContent = "No GIFs found."; }
+  } catch (e) { body.className = "nt"; body.textContent = "Could not load GIFs. Check your GIPHY key."; }
+}
+function epShow(t) {
+  epTab = t; document.querySelectorAll(".eptabs button").forEach(b => b.classList.toggle("on", b.dataset.t === t));
+  const body = $("epb"); $("gq").hidden = t !== "g" || !GIPHY_KEY; body.className = ""; body.textContent = "";
+  if (t === "e") EMO.forEach(e => {
+    const b = document.createElement("button"); b.type = "button"; b.textContent = e;
+    b.onclick = () => { const x = $("txt"), a = x.selectionStart ?? x.value.length, z = x.selectionEnd ?? a; x.value = x.value.slice(0, a) + e + x.value.slice(z); x.focus(); x.selectionStart = x.selectionEnd = a + e.length; x.dispatchEvent(new Event("input")); };
+    body.append(b);
+  });
+  else if (t === "s") { body.className = "st"; STK.forEach(e => { const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.onclick = () => { stk = e; sendQuiet(); }; body.append(b); }); }
+  else if (!GIPHY_KEY) { body.className = "nt"; body.textContent = "GIF search needs a free GIPHY key: create one at developers.giphy.com and put it in GIPHY_KEY at the top of the script. You can always send your own GIF with the paperclip button."; }
+  else gifLoad($("gq").value.trim());
+}
+document.querySelectorAll(".eptabs button").forEach(b => b.onclick = ev => { ev.stopPropagation(); epShow(b.dataset.t); });
+$("gq").addEventListener("input", () => { clearTimeout(gqTimer); gqTimer = setTimeout(() => gifLoad($("gq").value.trim()), 400); });
+async function cleanOldMedia(manual) {
+  const cutoff = nowMs() - CLEAN_DAYS * 864e5, snap = await db.ref("messages").orderByChild("createdAt").endAt(cutoff).once("value"), ops = []; let n = 0;
+  snap.forEach(c => {
+    const m = c.val(); if (!m || m.expired) return;
+    const ids = [m.video, m.voice, m.round, m.agif].filter(x => x && x.id).map(x => x.id);
+    if (!ids.length && !m.image) return;
+    ids.forEach(id => ops.push(db.ref("media/" + id).remove()));
+    ops.push(c.ref.update({ expired: true, image: null, video: null, voice: null, round: null, agif: null })); n++;
+  });
+  await Promise.all(ops); localStorage.setItem("lastClean", String(Date.now()));
+  if (manual) note(n ? "Cleaned the media of " + n + " old messages." : "Nothing older than " + CLEAN_DAYS + " days to clean.");
+}
 $("mic").onclick = () => toggleRec();
 $("txt").addEventListener("input", updateGo); updateGo();
 $("cam").onclick = () => { if (!db) return note("Not connected to Firebase yet."); $("rv").hidden = false; rvFacing = "user"; rvStart(); };
@@ -683,27 +797,28 @@ $("rvr").onclick = () => {
   if (rvRec) { rvRec.stop(); return; }
   const mime = ["video/webm;codecs=vp8,opus", "video/webm", "video/mp4"].find(m => MediaRecorder.isTypeSupported(m));
   rvChunks = []; rvCancel = false;
-  const rr = rvRec = new MediaRecorder(rvStream, mime ? { mimeType: mime, videoBitsPerSecond: 800000, audioBitsPerSecond: 64000 } : {});
+  const rr = rvRec = new MediaRecorder(rvStream, mime ? { mimeType: mime, videoBitsPerSecond: 1800000, audioBitsPerSecond: 64000 } : {});
   rr.ondataavailable = e => e.data.size && rvChunks.push(e.data);
   rr.onstop = async () => {
     const dur = Math.round((Date.now() - rvT0) / 1000), type = (rr.mimeType || mime || "video/webm").split(";")[0], blob = new Blob(rvChunks, { type }), cancel = rvCancel;
     rvClose();
     if (cancel || dur < 1) return;
-    rnd = { url: await readURL(blob), type, dur, size: blob.size };
+    rnd = { blob, type, dur, size: blob.size };
     $("send").dispatchEvent(new Event("submit", { cancelable: true }));
   };
   rvT0 = Date.now(); rr.start(); $("rvr").classList.add("on");
   rvTimer = setInterval(() => { $("rvt").textContent = fmt((Date.now() - rvT0) / 1000); }, 500);
 };
-$("emo").onclick = ev => { ev.stopPropagation(); $("ep").hidden = !$("ep").hidden; };
+$("emo").onclick = ev => { ev.stopPropagation(); $("ep").hidden = !$("ep").hidden; if (!$("ep").hidden) epShow(epTab); };
 $("file").onchange = async () => {
   const f = $("file").files[0]; $("file").value = ""; if (!f) return;
+  if (f.type === "image/gif") { if (f.size > 20 * 1048576) return note("That GIF is over 20 MB."); gifUp = { blob: f, size: f.size }; pic = null; vid = null; return renderCtx(); }
   if (f.type.startsWith("video/")) return pickVideo(f);
   try {
     let d = await compress(f, 1000, .65);
     if (d.length > 300000) d = await compress(f, 700, .5);
     if (d.length > 300000) return note("That image is too large.");
-    pic = d; vid = null; renderCtx();
+    pic = d; vid = null; gifUp = null; renderCtx();
   } catch (e) { note("Could not read that image."); }
 };
 $("nm").addEventListener("input", () => { localStorage.setItem("chatName", $("nm").value.trim().slice(0, 24)); paintMe(); });
@@ -741,7 +856,7 @@ $("send").addEventListener("submit", async e => {
     else note("Wrong admin password.");
     return;
   }
-  if ((!text && !pic && !vid && !voice && !rnd) || !db) return;
+  if ((!text && !pic && !vid && !voice && !rnd && !gifUp && !stk && !gifSel) || !db) return;
   $("txt").value = "";
   const data = { uid: myUid(), name: getName(), text: text.slice(0, 500), createdAt: firebase.database.ServerValue.TIMESTAMP };
   if (replyTo) data.reply = { id: replyTo.id, name: replyTo.name, text: replyTo.text.slice(0, 80) };
@@ -749,9 +864,11 @@ $("send").addEventListener("submit", async e => {
   const v = vid; if (v) data.video = { id: db.ref("media").push().key, size: v.size };
   const vc = voice; if (vc) data.voice = { id: db.ref("media").push().key, dur: vc.dur, size: vc.size };
   const rd = rnd; if (rd) data.round = { id: db.ref("media").push().key, dur: rd.dur, size: rd.size };
-  replyTo = null; pic = null; vid = null; voice = null; rnd = null; renderCtx();
-  const warn = setTimeout(() => $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not saved yet. Check: 1) your config values, 2) the databaseURL is exactly the one shown in Realtime Database, 3) the rules are published.</div>'), (v || vc || rd) ? 600000 : 6000);
-  try { if (v) await putMedia(data.video.id, v.url, v.type); if (vc) await putMedia(data.voice.id, vc.url, vc.type); if (rd) await putMedia(data.round.id, rd.url, rd.type); await db.ref("messages").push(data); clearTimeout(warn); }
+  const ga = gifUp; if (ga) data.agif = { id: db.ref("media").push().key, size: ga.size };
+  if (stk) data.sticker = stk; if (gifSel) data.gif = gifSel;
+  replyTo = null; pic = null; vid = null; voice = null; rnd = null; gifUp = null; stk = null; gifSel = null; renderCtx();
+  const warn = setTimeout(() => $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not saved yet. Check: 1) your config values, 2) the databaseURL is exactly the one shown in Realtime Database, 3) the rules are published.</div>'), (v || vc || rd || ga) ? 600000 : 6000);
+  try { if (v) await putMedia(data.video.id, v.blob, v.type); if (vc) await putMedia(data.voice.id, vc.blob, vc.type); if (rd) await putMedia(data.round.id, rd.blob, rd.type); if (ga) await putMedia(data.agif.id, ga.blob, "image/gif"); await db.ref("messages").push(data); clearTimeout(warn); }
   catch (err) { $("msgs").insertAdjacentHTML("beforeend", '<div id="note">Not sent (' + err.code + ')</div>'); }
 });
 </script>
