@@ -251,6 +251,10 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 .bub.noBg .mf{color:#8f98c4}
 .me .bub.noBg .tick.read{color:#7cf0ff}
 </style>
+<style id="v15">
+.bub.noBg .quote{background:rgba(255,255,255,.1);border-left:3px solid #7cf0ff;color:#e8ecff;padding:6px 11px;border-radius:10px;margin:0 0 8px;font-size:.84rem}
+.bub.noBg .quote:hover{background:rgba(255,255,255,.16)}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
@@ -291,7 +295,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v14</span>
+  <span>&copy; 2026 Quanta · v15</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -540,7 +544,7 @@ function openMenu(key, m, anchor) {
   EMOJIS.forEach(e => { const b = document.createElement("button"); b.type = "button"; b.textContent = e; b.onclick = () => { react(key, e); mm.hidden = true; }; em.append(b); });
   mm.append(em);
   const act = (label, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "act " + (cls || ""); b.textContent = label; b.onclick = fn; mm.append(b); return b; };
-  act("↩ Reply", () => { replyTo = { id: key, name: m.name, text: m.text || "" }; renderCtx(); $("txt").focus(); mm.hidden = true; });
+  act("↩ Reply", () => { replyTo = { id: key, name: m.name, text: m.text || m.sticker || "" }; renderCtx(); $("txt").focus(); mm.hidden = true; });
   if (m.uid ? m.uid === myUid() : m.name === getName()) {
     act("✎ Edit", () => { editing = { key, media: !!(m.image || m.video) }; $("txt").value = m.text || ""; renderCtx(); $("txt").focus(); mm.hidden = true; });
     const d = act("🗑 Delete", () => {
@@ -721,7 +725,7 @@ function startChat() {
         b.append(row);
       }
       const rb = document.createElement("button"); rb.className = "rb"; rb.type = "button"; rb.textContent = "↩"; rb.title = "Reply";
-      rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || ""}; renderCtx(); $("txt").focus(); };
+      rb.onclick = () => { replyTo = {id: snap.key, name: m.name, text: m.text || m.sticker || ""}; renderCtx(); $("txt").focus(); };
       const ft = document.createElement("div"); ft.className = "mf"; ft.append(tstr);
       if (mineMsg) { const tk = document.createElement("span"); tk.className = "tick"; tk.dataset.ts = m.createdAt || 0; setTick(tk); ft.append(tk); }
       b.append(ft);
