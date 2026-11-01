@@ -535,7 +535,7 @@ function linkify(text) {
   }
   f.append(text.slice(last)); return f;
 }
-const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
+const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "💯"];
 const myUid = () => localStorage.getItem("chatUid");
 const react = (key, e) => { const r = db.ref("messages/" + key + "/reactions/" + myUid()); r.once("value").then(x => x.val() === e ? r.remove() : r.set(e)); };
 function openMenu(key, m, anchor) {
