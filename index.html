@@ -329,7 +329,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v17</span>
+  <span>&copy; 2026 Quanta · v18</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -430,10 +430,18 @@ const firebaseConfig = {
   appId: "1:1070419381922:web:0489e389a71da0e68311fb",
   measurementId: "G-VX54VWV7J7"
 };
+
 // Optional: free GIPHY API key for GIF search (get one at developers.giphy.com). Leave empty to hide GIF search.
 const GIPHY_KEY = "";
 // Media (photos, videos, voice, GIFs) older than this many days is removed by the admin cleanup
 const CLEAN_DAYS = 30;
+// Relay (TURN) servers let calls connect across different networks (mobile data, strict Wi-Fi).
+// These are free shared public servers. For best results create your own free account at metered.ca and paste its servers here.
+const TURN = [
+  { urls: "turn:openrelay.metered.ca:80", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443", username: "openrelayproject", credential: "openrelayproject" },
+  { urls: "turn:openrelay.metered.ca:443?transport=tcp", username: "openrelayproject", credential: "openrelayproject" }
+];
 
 // SHA-256 of the password (so it is not written in plain text)
 const HASH = "44e7618aae12a7704d40e40ecb765178584d7c4dd3b312350f15c6278bcf114d";
@@ -581,7 +589,7 @@ function linkify(text) {
   }
   f.append(text.slice(last)); return f;
 }
-const ICE = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
+const ICE = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }, ...TURN] };
 const tone = f => { try {
   actxC = actxC || new (window.AudioContext || window.webkitAudioContext)(); if (actxC.state === "suspended") actxC.resume();
   const o = actxC.createOscillator(), g = actxC.createGain(), t = actxC.currentTime; o.type = "sine"; o.frequency.value = f;
@@ -595,16 +603,22 @@ function showCall(name, video, status) {
   $("cName").textContent = name; $("cStat").textContent = status; $("cAv").textContent = String(name || "?")[0].toUpperCase(); $("cAv").style.background = colorOf(String(name));
   $("cCam").hidden = !video; $("cMic").classList.remove("off"); $("cCam").classList.remove("off");
 }
-const callMedia = video => navigator.mediaDevices.getUserMedia({ audio: true, video: video ? { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } : false });
+const callMedia = async video => {
+  const g = c => navigator.mediaDevices.getUserMedia(c);
+  try { return await g({ audio: true, video: video ? { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } : false }); }
+  catch (e) { if (video && e.name !== "NotAllowedError") return await g({ audio: true }); throw e; }
+};
+const callFail = e => e && e.name === "NotAllowedError" ? "Allow the camera and microphone to make calls." : e && e.code === "PERMISSION_DENIED" ? "Firebase blocked the call. Add the 'calls' and 'inbox' rules and publish them." : "Could not start the call (" + ((e && (e.code || e.name || e.message)) || "error") + ").";
 const flushIce = () => { if (!call || !call.pc) return; call.pending.splice(0).forEach(c => call.pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {})); };
 function makePc(id, side) {
   const pc = new RTCPeerConnection(ICE); call.pc = pc;
   const mine = side === "caller" ? "icec" : "icee", theirs = side === "caller" ? "icee" : "icec";
   pc.onicecandidate = e => { if (e.candidate) db.ref("calls/" + id + "/" + mine).push(e.candidate.toJSON()); };
   pc.ontrack = e => { $("cRemote").srcObject = e.streams[0]; };
+  pc.oniceconnectionstatechange = () => { console.log("ICE:", pc.iceConnectionState); if (call && call.pc === pc && pc.iceConnectionState === "disconnected") $("cStat").textContent = "Reconnecting…"; };
   pc.onconnectionstatechange = () => {
     if (!call || call.pc !== pc) return;
-    if (pc.connectionState === "connected") { ringStop(); call.connected = true; clearTimeout(call.timeout); const t0 = Date.now(); $("cStat").textContent = "0:00"; clearInterval(callTimer); callTimer = setInterval(() => { $("cStat").textContent = fmt((Date.now() - t0) / 1000); }, 1000); }
+    if (pc.connectionState === "connected") { ringStop(); call.connected = true; clearTimeout(call.timeout); clearTimeout(call.ctimeout); const t0 = Date.now(); $("cStat").textContent = "0:00"; clearInterval(callTimer); callTimer = setInterval(() => { $("cStat").textContent = fmt((Date.now() - t0) / 1000); }, 1000); }
     if (pc.connectionState === "failed") endCall(true, "Could not connect. A strict network may block direct calls.");
   };
   const ref = db.ref("calls/" + id + "/" + theirs);
@@ -618,7 +632,7 @@ function endCall(sendEnd, msg) {
   ringStop(); clearInterval(callTimer);
   const c = call; call = null;
   if (c) {
-    clearTimeout(c.timeout); c.unsubs.forEach(f => { try { f(); } catch (e) {} });
+    clearTimeout(c.timeout); clearTimeout(c.ctimeout); c.unsubs.forEach(f => { try { f(); } catch (e) {} });
     if (sendEnd && db) db.ref("calls/" + c.id + "/state").set("ended").catch(() => {});
     try { c.pc && c.pc.close(); } catch (e) {}
     if (c.stream) c.stream.getTracks().forEach(t => t.stop());
@@ -636,15 +650,15 @@ async function startCall(toUid, toName, video) {
     showCall(toName, video, "Calling…"); ringStart(true);
     const id = call.id, pc = makePc(id, "caller");
     const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-    await db.ref("calls/" + id).set({ from: myUid(), fromName: getName(), to: toUid, video, state: "ringing", offer: { type: offer.type, sdp: offer.sdp }, ts: firebase.database.ServerValue.TIMESTAMP });
+    await db.ref("calls/" + id).update({ from: myUid(), fromName: getName(), to: toUid, video, state: "ringing", offer: { type: offer.type, sdp: offer.sdp }, ts: firebase.database.ServerValue.TIMESTAMP });
     db.ref("calls/" + id + "/state").onDisconnect().set("ended");
     await db.ref("inbox/" + toUid).set({ id, from: myUid(), fromName: getName(), video, ts: firebase.database.ServerValue.TIMESTAMP });
     const aref = db.ref("calls/" + id + "/answer"), sref = db.ref("calls/" + id + "/state");
-    aref.on("value", async sn => { const a = sn.val(); if (a && call && call.pc === pc && !pc.remoteDescription) { await pc.setRemoteDescription(a); flushIce(); ringStop(); $("cStat").textContent = "Connecting…"; } });
+    aref.on("value", async sn => { const a = sn.val(); if (a && call && call.pc === pc && !pc.remoteDescription) { await pc.setRemoteDescription(a); flushIce(); ringStop(); $("cStat").textContent = "Connecting…"; call.ctimeout = setTimeout(() => { if (call && !call.connected) endCall(true, "Could not connect. The network may be blocking direct calls."); }, 25000); } });
     sref.on("value", sn => { const st = sn.val(); if (!call || call.id !== id) return; if (st === "declined") endCall(false, "Call declined."); else if (st === "busy") endCall(false, "That person is busy."); else if (st === "ended") endCall(false, "Call ended."); });
     call.unsubs.push(() => aref.off(), () => sref.off());
     call.timeout = setTimeout(() => { if (call && !call.connected) endCall(true, "No answer."); }, 45000);
-  } catch (e) { endCall(true, e && e.name === "NotAllowedError" ? "Allow the camera and microphone to make calls." : "Could not start the call."); }
+  } catch (e) { console.warn(e); endCall(true, callFail(e)); }
 }
 function showIncoming(v) {
   incoming = v; $("inc").hidden = false; $("iName").textContent = v.fromName || "Someone"; $("iKind").textContent = v.video ? "Incoming video call…" : "Incoming voice call…";
@@ -661,11 +675,12 @@ async function acceptCall() {
     await pc.setRemoteDescription(snap.offer); flushIce();
     const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
     await db.ref("calls/" + v.id + "/answer").set({ type: ans.type, sdp: ans.sdp });
+    call.ctimeout = setTimeout(() => { if (call && !call.connected) endCall(true, "Could not connect. The network may be blocking direct calls."); }, 25000);
     await db.ref("calls/" + v.id + "/state").set("active"); db.ref("calls/" + v.id + "/state").onDisconnect().set("ended"); db.ref("inbox/" + myUid()).remove();
     const sref = db.ref("calls/" + v.id + "/state"), id = v.id;
     sref.on("value", sn => { if (call && call.id === id && sn.val() === "ended") endCall(false, "Call ended."); });
     call.unsubs.push(() => sref.off());
-  } catch (e) { endCall(true, e && e.name === "NotAllowedError" ? "Allow the camera and microphone to answer calls." : "The call is no longer available."); }
+  } catch (e) { console.warn(e); endCall(true, e && e.message === "gone" ? "The call is no longer available." : callFail(e)); }
 }
 function declineCall() {
   const v = incoming; incoming = null; $("inc").hidden = true; ringStop(); if (!v || !db) return;
