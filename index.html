@@ -255,6 +255,40 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 .bub.noBg .quote{background:rgba(255,255,255,.1);border-left:3px solid #7cf0ff;color:#e8ecff;padding:6px 11px;border-radius:10px;margin:0 0 8px;font-size:.84rem}
 .bub.noBg .quote:hover{background:rgba(255,255,255,.16)}
 </style>
+<style id="v16">
+.m .bub.noBg .rxc{color:#e8ecff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);font-size:.92rem;padding:2px 11px}
+.m .bub.noBg .rxc.mine{border-color:#7cf0ff;background:rgba(124,240,255,.22)}
+.m .bub.noBg .rx{margin-top:8px}
+</style>
+<style id="v17">
+#call{position:fixed;inset:0;z-index:60;background:radial-gradient(900px 600px at 50% 0%,#1b2a66,#070a1a);display:grid}
+#call[hidden],#inc[hidden]{display:none}
+#cRemote{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+#call:not(.video) #cRemote{opacity:0}
+#cInfo{position:absolute;top:0;left:0;right:0;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;text-shadow:0 2px 12px rgba(0,0,0,.6);color:#fff}
+#call:not(.video) #cInfo{top:22%}
+#cAv,#iAv{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;font-size:3rem;font-weight:700;color:#08102a;box-shadow:0 0 0 8px rgba(255,255,255,.08),0 0 80px rgba(124,240,255,.35)}
+#call.video #cAv{display:none}
+#cName,#iName{font-family:"Space Grotesk",sans-serif;font-size:1.7rem;font-weight:700}
+#cStat,#iKind{opacity:.85}
+#cLocal{position:absolute;right:16px;bottom:120px;width:min(32vw,180px);aspect-ratio:3/4;object-fit:cover;border-radius:16px;border:2px solid rgba(255,255,255,.35);background:#000;transform:scaleX(-1);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#call:not(.video) #cLocal{display:none}
+#cBtns{position:absolute;bottom:34px;left:0;right:0;display:flex;justify-content:center;gap:22px}
+#cBtns button{width:62px;height:62px;border-radius:50%;border:0;background:rgba(255,255,255,.16);backdrop-filter:blur(10px);color:#fff;cursor:pointer;display:grid;place-items:center;font-size:1.5rem}
+#cBtns button.off{background:#fff;color:#111}
+#cBtns button[hidden]{display:none}
+#cBtns button.end{background:#e5362b}
+#cBtns button.end span{display:block;transform:rotate(135deg)}
+#inc{position:fixed;inset:0;z-index:70;background:rgba(3,5,14,.92);backdrop-filter:blur(10px);display:grid;place-items:center}
+.incbox{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:#e8ecff}
+.incb{display:flex;gap:26px;margin-top:22px}
+.incb button{padding:14px 28px;border-radius:999px;border:0;font:inherit;font-weight:600;cursor:pointer;color:#fff}
+.incb .red{background:#e5362b}
+.incb .green{background:#22b455}
+.callb{display:flex;gap:6px;margin-left:8px}
+.callb button{border:0;background:rgba(255,255,255,.1);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:.9rem;color:inherit}
+.callb button:hover{background:rgba(124,240,255,.25)}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
@@ -295,7 +329,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
   </section>
 </main>
 <footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v15</span>
+  <span>&copy; 2026 Quanta · v17</span>
   <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
 </div></footer>
 
@@ -371,6 +405,13 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 })();
 </script>
 <div id="mm" hidden></div>
+<div id="call" hidden>
+  <video id="cRemote" autoplay playsinline></video>
+  <div id="cInfo"><div id="cAv"></div><div id="cName"></div><div id="cStat"></div></div>
+  <video id="cLocal" autoplay playsinline muted></video>
+  <div id="cBtns"><button id="cMic" type="button" title="Mute microphone">🎤</button><button id="cCam" type="button" title="Camera on/off">📷</button><button id="cEnd" type="button" class="end" title="End call"><span>📞</span></button></div>
+</div>
+<div id="inc" hidden><div class="incbox"><div id="iAv"></div><div id="iName"></div><div id="iKind"></div><div class="incb"><button id="iNo" type="button" class="red">Decline</button><button id="iYes" type="button" class="green">Accept</button></div></div></div>
 <div id="rv" hidden><div class="rvbox"><div class="ring"><video id="rvp" muted playsinline></video></div><div id="rvt">0:00</div>
 <div class="rvb"><button type="button" id="rvx">Cancel</button><button type="button" id="rvr" aria-label="Record"></button><button type="button" id="rvf">Flip</button></div></div></div>
 <div id="lb" onclick="this.classList.remove('on')"><img id="lbi" alt=""></div>
@@ -389,7 +430,6 @@ const firebaseConfig = {
   appId: "1:1070419381922:web:0489e389a71da0e68311fb",
   measurementId: "G-VX54VWV7J7"
 };
-
 // Optional: free GIPHY API key for GIF search (get one at developers.giphy.com). Leave empty to hide GIF search.
 const GIPHY_KEY = "";
 // Media (photos, videos, voice, GIFs) older than this many days is removed by the admin cleanup
@@ -418,7 +458,7 @@ const square = (file, size, q) => new Promise((res, rej) => {
   img.onerror = rej; img.src = u;
 });
 let db, started = false, replyTo = null, pic = null, pref = null, chatOpen = false, onlineNames = new Set();
-let gifUp = null, stk = null, gifSel = null, epTab = "e", gqTimer = null, rnd = null, rvStream = null, rvRec = null, rvChunks = [], rvT0 = 0, rvTimer = null, rvFacing = "user", rvCancel = false, lastDay = "", typers = [], lastTyping = 0, typingTimer = null, rec = null, recChunks = [], recT0 = 0, recTimer = null, recStream = null, voice = null, curAudio = null, editing = null, presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
+let call = null, incoming = null, ringT = null, callTimer = null, actxC = null, pinned = true, gifUp = null, stk = null, gifSel = null, epTab = "e", gqTimer = null, rnd = null, rvStream = null, rvRec = null, rvChunks = [], rvT0 = 0, rvTimer = null, rvFacing = "user", rvCancel = false, lastDay = "", typers = [], lastTyping = 0, typingTimer = null, rec = null, recChunks = [], recT0 = 0, recTimer = null, recStream = null, voice = null, curAudio = null, editing = null, presenceRows = [], presenceUid = "", clockOffset = 0, vid = null, vidBusy = "";
 const nowMs = () => Date.now() + clockOffset;
 const ago = t => { const m = Math.max(0, Math.floor((nowMs() - t) / 60000)); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.floor(m / 60) + " h ago" : Math.floor(m / 1440) + " d ago"; };
 function renderPresence() {
@@ -429,7 +469,13 @@ function renderPresence() {
   rows.forEach(r => {
     const d = document.createElement("div"), i = document.createElement("i"), n = document.createElement("span"), t = document.createElement("small");
     d.className = "pr" + (r.online ? " on" : ""); n.textContent = r.name + (r.id === presenceUid ? " (you)" : ""); t.textContent = r.online ? "online" : "last seen " + ago(r.lastSeen);
-    const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t); pl.append(d);
+    const pa = document.createElement("div"); pa.className = "pa"; pa.dataset.n = r.name; paintAv(pa, r.name); d.append(i, pa, n, t);
+    if (r.online && r.id !== presenceUid) {
+      const cb = document.createElement("span"); cb.className = "callb";
+      [["📞", false, "Voice call"], ["🎥", true, "Video call"]].forEach(([ic, vv, tt]) => { const b = document.createElement("button"); b.type = "button"; b.textContent = ic; b.title = tt + " with " + r.name; b.onclick = ev => { ev.stopPropagation(); startCall(r.id, r.name, vv); }; cb.append(b); });
+      d.append(cb);
+    }
+    pl.append(d);
   });
   document.querySelectorAll(".av").forEach(a => a.classList.toggle("on", onlineNames.has(a.dataset.n)));
 }
@@ -535,7 +581,97 @@ function linkify(text) {
   }
   f.append(text.slice(last)); return f;
 }
-const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "💯"];
+const ICE = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }] };
+const tone = f => { try {
+  actxC = actxC || new (window.AudioContext || window.webkitAudioContext)(); if (actxC.state === "suspended") actxC.resume();
+  const o = actxC.createOscillator(), g = actxC.createGain(), t = actxC.currentTime; o.type = "sine"; o.frequency.value = f;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.25, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + .45);
+  o.connect(g); g.connect(actxC.destination); o.start(); o.stop(t + .5);
+} catch (e) {} };
+function ringStart(out) { ringStop(); const go = () => { tone(out ? 440 : 660); if (!out) setTimeout(() => tone(880), 260); }; go(); ringT = setInterval(go, out ? 2400 : 1500); }
+function ringStop() { clearInterval(ringT); ringT = null; }
+function showCall(name, video, status) {
+  const c = $("call"); c.hidden = false; c.classList.toggle("video", !!video);
+  $("cName").textContent = name; $("cStat").textContent = status; $("cAv").textContent = String(name || "?")[0].toUpperCase(); $("cAv").style.background = colorOf(String(name));
+  $("cCam").hidden = !video; $("cMic").classList.remove("off"); $("cCam").classList.remove("off");
+}
+const callMedia = video => navigator.mediaDevices.getUserMedia({ audio: true, video: video ? { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } } : false });
+const flushIce = () => { if (!call || !call.pc) return; call.pending.splice(0).forEach(c => call.pc.addIceCandidate(new RTCIceCandidate(c)).catch(() => {})); };
+function makePc(id, side) {
+  const pc = new RTCPeerConnection(ICE); call.pc = pc;
+  const mine = side === "caller" ? "icec" : "icee", theirs = side === "caller" ? "icee" : "icec";
+  pc.onicecandidate = e => { if (e.candidate) db.ref("calls/" + id + "/" + mine).push(e.candidate.toJSON()); };
+  pc.ontrack = e => { $("cRemote").srcObject = e.streams[0]; };
+  pc.onconnectionstatechange = () => {
+    if (!call || call.pc !== pc) return;
+    if (pc.connectionState === "connected") { ringStop(); call.connected = true; clearTimeout(call.timeout); const t0 = Date.now(); $("cStat").textContent = "0:00"; clearInterval(callTimer); callTimer = setInterval(() => { $("cStat").textContent = fmt((Date.now() - t0) / 1000); }, 1000); }
+    if (pc.connectionState === "failed") endCall(true, "Could not connect. A strict network may block direct calls.");
+  };
+  const ref = db.ref("calls/" + id + "/" + theirs);
+  ref.on("child_added", sn => { if (pc.remoteDescription) pc.addIceCandidate(new RTCIceCandidate(sn.val())).catch(() => {}); else call.pending.push(sn.val()); });
+  call.unsubs.push(() => ref.off());
+  call.stream.getTracks().forEach(t => pc.addTrack(t, call.stream));
+  $("cLocal").srcObject = call.stream;
+  return pc;
+}
+function endCall(sendEnd, msg) {
+  ringStop(); clearInterval(callTimer);
+  const c = call; call = null;
+  if (c) {
+    clearTimeout(c.timeout); c.unsubs.forEach(f => { try { f(); } catch (e) {} });
+    if (sendEnd && db) db.ref("calls/" + c.id + "/state").set("ended").catch(() => {});
+    try { c.pc && c.pc.close(); } catch (e) {}
+    if (c.stream) c.stream.getTracks().forEach(t => t.stop());
+    if (db && c.side === "caller") setTimeout(() => { db.ref("calls/" + c.id).remove(); db.ref("inbox/" + c.peer).remove(); }, 3000);
+  }
+  $("call").hidden = true; $("inc").hidden = true; $("cRemote").srcObject = null; $("cLocal").srcObject = null;
+  if (msg) note(msg);
+}
+async function startCall(toUid, toName, video) {
+  if (call || incoming) return note("You are already in a call.");
+  if (!db) return;
+  try {
+    call = { id: db.ref("calls").push().key, side: "caller", video, peer: toUid, unsubs: [], pending: [], connected: false };
+    call.stream = await callMedia(video);
+    showCall(toName, video, "Calling…"); ringStart(true);
+    const id = call.id, pc = makePc(id, "caller");
+    const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+    await db.ref("calls/" + id).set({ from: myUid(), fromName: getName(), to: toUid, video, state: "ringing", offer: { type: offer.type, sdp: offer.sdp }, ts: firebase.database.ServerValue.TIMESTAMP });
+    db.ref("calls/" + id + "/state").onDisconnect().set("ended");
+    await db.ref("inbox/" + toUid).set({ id, from: myUid(), fromName: getName(), video, ts: firebase.database.ServerValue.TIMESTAMP });
+    const aref = db.ref("calls/" + id + "/answer"), sref = db.ref("calls/" + id + "/state");
+    aref.on("value", async sn => { const a = sn.val(); if (a && call && call.pc === pc && !pc.remoteDescription) { await pc.setRemoteDescription(a); flushIce(); ringStop(); $("cStat").textContent = "Connecting…"; } });
+    sref.on("value", sn => { const st = sn.val(); if (!call || call.id !== id) return; if (st === "declined") endCall(false, "Call declined."); else if (st === "busy") endCall(false, "That person is busy."); else if (st === "ended") endCall(false, "Call ended."); });
+    call.unsubs.push(() => aref.off(), () => sref.off());
+    call.timeout = setTimeout(() => { if (call && !call.connected) endCall(true, "No answer."); }, 45000);
+  } catch (e) { endCall(true, e && e.name === "NotAllowedError" ? "Allow the camera and microphone to make calls." : "Could not start the call."); }
+}
+function showIncoming(v) {
+  incoming = v; $("inc").hidden = false; $("iName").textContent = v.fromName || "Someone"; $("iKind").textContent = v.video ? "Incoming video call…" : "Incoming voice call…";
+  $("iAv").textContent = String(v.fromName || "?")[0].toUpperCase(); $("iAv").style.background = colorOf(String(v.fromName)); ringStart(false);
+}
+async function acceptCall() {
+  const v = incoming; if (!v) return; incoming = null; $("inc").hidden = true; ringStop();
+  try {
+    const snap = (await db.ref("calls/" + v.id).once("value")).val(); if (!snap || snap.state !== "ringing") throw new Error("gone");
+    call = { id: v.id, side: "callee", video: !!v.video, peer: v.from, unsubs: [], pending: [], connected: false };
+    call.stream = await callMedia(call.video);
+    showCall(v.fromName, call.video, "Connecting…");
+    const pc = makePc(v.id, "callee");
+    await pc.setRemoteDescription(snap.offer); flushIce();
+    const ans = await pc.createAnswer(); await pc.setLocalDescription(ans);
+    await db.ref("calls/" + v.id + "/answer").set({ type: ans.type, sdp: ans.sdp });
+    await db.ref("calls/" + v.id + "/state").set("active"); db.ref("calls/" + v.id + "/state").onDisconnect().set("ended"); db.ref("inbox/" + myUid()).remove();
+    const sref = db.ref("calls/" + v.id + "/state"), id = v.id;
+    sref.on("value", sn => { if (call && call.id === id && sn.val() === "ended") endCall(false, "Call ended."); });
+    call.unsubs.push(() => sref.off());
+  } catch (e) { endCall(true, e && e.name === "NotAllowedError" ? "Allow the camera and microphone to answer calls." : "The call is no longer available."); }
+}
+function declineCall() {
+  const v = incoming; incoming = null; $("inc").hidden = true; ringStop(); if (!v || !db) return;
+  db.ref("calls/" + v.id + "/state").set("declined"); db.ref("inbox/" + myUid()).remove();
+}
+const EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 const myUid = () => localStorage.getItem("chatUid");
 const react = (key, e) => { const r = db.ref("messages/" + key + "/reactions/" + myUid()); r.once("value").then(x => x.val() === e ? r.remove() : r.set(e)); };
 function openMenu(key, m, anchor) {
@@ -649,7 +785,7 @@ function startChat() {
       const tstr = new Date(m.createdAt || nowMs()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + (m.edited ? " · edited" : "");
       s.textContent = m.name; if (mineMsg) s.style.display = "none";
       const stick = near || m.name === me;
-      el.id = "m-" + snap.key; b.append(s);
+      el.id = "m-" + snap.key; if (isChange) el.style.animation = "none"; b.append(s);
       if (m.reply) {
         const q = document.createElement("div"); q.className = "quote"; q.textContent = m.reply.name + ": " + (m.reply.text || "attachment");
         q.onclick = () => { const t = document.getElementById("m-" + m.reply.id); if (t) { t.scrollIntoView({behavior: "smooth", block: "center"}); t.classList.add("flash"); setTimeout(() => t.classList.remove("flash"), 1200); } };
@@ -657,7 +793,7 @@ function startChat() {
       }
       if (typeof m.image === "string" && m.image.startsWith("data:image/")) {
         const i = document.createElement("img"); i.className = "pic"; i.decoding = "async"; i.src = m.image;
-        i.onload = () => { if (stick) box.scrollTop = box.scrollHeight; };
+        i.onload = () => { if (pinned) box.scrollTop = box.scrollHeight; };
         i.onclick = () => { $("lbi").src = m.image; $("lb").classList.add("on"); };
         b.append(i);
       }
@@ -676,11 +812,11 @@ function startChat() {
       }
       if (m.sticker) { b.classList.add("noBg"); const k = document.createElement("div"); k.className = "stk"; k.textContent = String(m.sticker).slice(0, 8); b.append(k); }
       if (m.gif && /^https:\/\/media\d*\.giphy\.com\//.test(String(m.gif.url))) {
-        b.classList.add("noBg"); const g = document.createElement("img"); g.className = "gifimg"; g.alt = "GIF"; g.src = m.gif.url; g.onload = () => { if (stick) box.scrollTop = box.scrollHeight; }; b.append(g);
+        b.classList.add("noBg"); const g = document.createElement("img"); g.className = "gifimg"; g.alt = "GIF"; g.src = m.gif.url; g.onload = () => { if (pinned) box.scrollTop = box.scrollHeight; }; b.append(g);
       }
       if (m.agif && m.agif.id) {
         b.classList.add("noBg"); const ph = document.createElement("div"); ph.className = "gifph"; ph.textContent = "GIF"; b.append(ph);
-        const ob = new IntersectionObserver(es => { if (!es[0].isIntersecting) return; ob.disconnect(); getMediaBlob(m.agif.id).then(bl => { if (!/^image\//.test(bl.type)) throw 0; const g = document.createElement("img"); g.className = "gifimg"; g.src = URL.createObjectURL(bl); g.onload = () => { if (stick) box.scrollTop = box.scrollHeight; }; ph.replaceWith(g); }).catch(() => { ph.textContent = "GIF unavailable"; }); });
+        const ob = new IntersectionObserver(es => { if (!es[0].isIntersecting) return; ob.disconnect(); getMediaBlob(m.agif.id).then(bl => { if (!/^image\//.test(bl.type)) throw 0; const g = document.createElement("img"); g.className = "gifimg"; g.src = URL.createObjectURL(bl); g.onload = () => { if (pinned) box.scrollTop = box.scrollHeight; }; ph.replaceWith(g); }).catch(() => { ph.textContent = "GIF unavailable"; }); });
         ob.observe(ph);
       }
       if (m.round && m.round.id) {
@@ -742,6 +878,13 @@ function startChat() {
     mq.on("child_added", sn => drawMsg(sn, false), err => { $("msgs").innerHTML = '<div id="note">Could not load messages (' + err.code + '). Check your Realtime Database rules.</div>'; });
     db.ref("typing").on("value", sn => { typers = []; sn.forEach(c => { const v = c.val(); if (v && c.key !== uid && v.name) typers.push(v); }); showTyping(); }, () => {});
     setInterval(showTyping, 2000);
+    db.ref("inbox/" + uid).on("value", sn => {
+      const v = sn.val();
+      if (!v || !v.id) { if (incoming) { incoming = null; $("inc").hidden = true; ringStop(); } return; }
+      if (nowMs() - (v.ts || 0) > 60000) { db.ref("inbox/" + uid).remove(); return; }
+      if (call || incoming) { db.ref("calls/" + v.id + "/state").set("busy"); db.ref("inbox/" + uid).remove(); return; }
+      showIncoming(v);
+    }, () => {});
     db.ref("reads").on("value", sn => { readsMap = {}; sn.forEach(c => { const v = c.val(); if (v && typeof v.ts === "number") readsMap[c.key] = v; }); refreshTicks(); }, () => {});
     mq.on("child_changed", sn => drawMsg(sn, true));
     mq.on("child_removed", sn => { const o = document.getElementById("m-" + sn.key); if (o) o.remove(); });
@@ -808,6 +951,10 @@ async function cleanOldMedia(manual) {
   if (manual) note(n ? "Cleaned the media of " + n + " old messages." : "Nothing older than " + CLEAN_DAYS + " days to clean.");
 }
 $("mic").onclick = () => toggleRec();
+$("iYes").onclick = acceptCall; $("iNo").onclick = declineCall; $("cEnd").onclick = () => endCall(true, "");
+$("cMic").onclick = () => { if (!call) return; const on = $("cMic").classList.toggle("off"); call.stream.getAudioTracks().forEach(t => { t.enabled = !on; }); };
+$("cCam").onclick = () => { if (!call) return; const on = $("cCam").classList.toggle("off"); call.stream.getVideoTracks().forEach(t => { t.enabled = !on; }); };
+$("msgs").addEventListener("scroll", () => { const b = $("msgs"); pinned = b.scrollHeight - b.scrollTop - b.clientHeight < 120; }, { passive: true });
 $("txt").addEventListener("input", updateGo); updateGo();
 $("cam").onclick = () => { if (!db) return note("Not connected to Firebase yet."); $("rv").hidden = false; rvFacing = "user"; rvStart(); };
 $("rvx").onclick = () => rvClose();
