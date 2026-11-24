@@ -257,7 +257,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 </style>
 <style id="v16">
 .m .bub.noBg .rxc{color:#e8ecff;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.28);font-size:.92rem;padding:2px 11px}
-.m .bub.noBg .rxc.mine{border-color:#7cf0ff;background:rgba(124,240,255,.22)}
+.m .bub.noBg .rxc.mine{border-color:var(--c1);background:rgba(255,255,255,.16)}
 .m .bub.noBg .rx{margin-top:8px}
 </style>
 <style id="v17">
@@ -827,6 +827,147 @@ footer.ft #gate input{font-family:var(--mono)}
   .ft-row{flex-direction:column;align-items:flex-start}
 }
 </style>
+<style id="v24">
+/* ===== v24: speed fixes, swipe, stories, history tools ===== */
+/* speed: no live blur behind every bubble; background glow without filter */
+.bub,.day,#more{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.day{background:rgba(14,19,46,.9)}
+.cbg i{filter:none;opacity:.5;background:radial-gradient(circle closest-side,var(--c1),transparent)!important;animation-duration:36s}
+.cbg i:nth-child(2){background:radial-gradient(circle closest-side,var(--c2),transparent)!important;animation-duration:44s}
+.cbg i:nth-child(3){background:radial-gradient(circle closest-side,var(--c3),transparent)!important;opacity:.22;animation-duration:52s}
+#chat.nobg .cbg{display:none}
+.ic{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:linear-gradient(180deg,rgba(18,23,58,.9),rgba(8,11,30,.88))}
+.mq{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(4,5,13,.82)}
+.grain{animation:none}
+/* softer, clean bubble shadow */
+.me .bub{box-shadow:0 6px 18px -10px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.4)}
+.bub{box-shadow:0 6px 18px -12px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.04)}
+.m.ment:not(.me) .bub{box-shadow:0 0 0 1.5px var(--c1),0 6px 18px -12px rgba(0,0,0,.7)}
+/* swipe to reply (touch and mouse) without selecting text */
+#msgs{overflow-x:hidden}
+.m{position:relative;touch-action:pan-y}
+.bub{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.m::after{content:"↩";position:absolute;right:-40px;top:50%;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:.95rem;background:rgba(255,255,255,.12);color:#fff;opacity:0;transform:translateY(-50%) scale(.5);transition:opacity .15s,transform .2s cubic-bezier(.2,1.5,.4,1),background .15s;pointer-events:none}
+.m.swiping::after{opacity:.6}
+.m.swok::after{opacity:1;transform:translateY(-50%) scale(1);background:var(--c1);color:#061024}
+.m.swiping{cursor:grabbing}
+.aemo.still{animation:none}
+/* stories bar */
+@media(min-width:900px){
+  #chat{grid-template-rows:auto auto auto minmax(0,1fr) auto auto auto;grid-template-areas:"side top" "side stry" "side pin" "side msgs" "side typ" "side ctx" "side send"}
+  #stry{grid-area:stry}
+  #pinbar{grid-area:pin;align-self:auto}
+  #chat.haspin #msgs{padding-top:18px}
+}
+#stry{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:10px clamp(14px,3.2vw,48px) 4px;min-width:0}
+#stl{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;min-width:0}
+#stl::-webkit-scrollbar{display:none}
+#stry.nost::after{content:"Share a moment. Stories disappear after 24 hours.";font-size:.78rem;color:#8f99cc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sti{position:relative;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:62px;border:0;background:none;color:#cfd5f7;font:inherit;cursor:pointer;padding:0;animation:stiIn .45s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes stiIn{from{opacity:0;transform:scale(.6)}}
+.sti .sring{position:relative;width:56px;height:56px;border-radius:50%;padding:3px;display:grid;place-items:center;transition:transform .25s cubic-bezier(.2,1.4,.4,1)}
+.sti .sring::before{content:"";position:absolute;inset:0;border-radius:50%;background:rgba(255,255,255,.16)}
+.sti.new .sring::before{background:conic-gradient(var(--c1),var(--c2),var(--c3),var(--c1));animation:spin 4s linear infinite}
+.sti.seen .sring::before{background:rgba(255,255,255,.25)}
+.sti .pa{position:relative;z-index:1;width:100%;height:100%;font-size:1.05rem;border:2.5px solid var(--b2,#05060f);box-shadow:none}
+.sti:hover .sring{transform:scale(1.07)}
+.sti:active .sring{transform:scale(.94)}
+.sti em{font-style:normal;font-size:.68rem;max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sti .plus{position:absolute;left:40px;top:38px;z-index:2;width:21px;height:21px;border-radius:50%;background:linear-gradient(135deg,var(--c1),var(--c2));color:#061024;font-style:normal;font-weight:800;font-size:.9rem;line-height:1;display:grid;place-items:center;border:2.5px solid var(--b2,#05060f)}
+/* story viewer */
+#sv{position:fixed;inset:0;z-index:75;display:grid;place-items:center;background:rgba(2,3,10,.9);animation:fadeIn .25s ease}
+#sv[hidden]{display:none}
+@keyframes fadeIn{from{opacity:0}}
+.sv-bg{position:absolute;inset:-60px;background-size:cover;background-position:center;filter:blur(46px) brightness(.5) saturate(1.3);transition:background .4s}
+.sv-card{position:relative;width:min(420px,100vw);height:min(calc(100vh - 32px),746px);border-radius:24px;overflow:hidden;background:#05060f;box-shadow:0 40px 120px -20px rgba(0,0,0,.95);animation:svIn .4s cubic-bezier(.2,1.1,.3,1)}
+.sv-card.swp{animation:svSw .38s cubic-bezier(.2,1.1,.3,1)}
+@keyframes svIn{from{opacity:0;transform:scale(.9) translateY(24px)}}
+@keyframes svSw{from{opacity:.2;transform:translateX(36px) scale(.97)}}
+.sv-media{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+.sv-media img{width:100%;height:100%;object-fit:contain;animation:svImg 6s ease-out both}
+@keyframes svImg{from{transform:scale(1.06)}}
+.sv-text{max-width:100%;padding:34px;text-align:center;font-family:"Space Grotesk",system-ui,sans-serif;font-weight:600;color:#fff;text-shadow:0 2px 24px rgba(0,0,0,.35);line-height:1.22;overflow-wrap:anywhere;white-space:pre-wrap;animation:svText .55s cubic-bezier(.2,1.2,.3,1) both}
+@keyframes svText{from{opacity:0;transform:translateY(14px) scale(.96)}}
+.sv-load{color:#fff;opacity:.7;font-size:.9rem}
+.sv-bars{position:absolute;top:10px;left:10px;right:10px;z-index:4;display:flex;gap:4px}
+.sv-bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden}
+.sv-bars b{display:block;height:100%;width:0;background:#fff;border-radius:2px}
+.sv-hd{position:absolute;top:18px;left:0;right:0;z-index:4;display:flex;align-items:center;gap:10px;padding:8px 12px 18px;background:linear-gradient(rgba(0,0,0,.5),transparent)}
+.sv-hd .pa{width:38px;height:38px;flex:none}
+.sv-who{flex:1;min-width:0;color:#fff;line-height:1.25}
+.sv-who b{display:block;font-size:.93rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-who small{font-size:.74rem;opacity:.75}
+.sv-hd button,#svViews{height:36px;min-width:36px;padding:0 10px;border-radius:999px;border:0;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;font:inherit;font-size:.85rem;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .2s}
+.sv-hd button:hover,#svViews:hover{background:rgba(255,255,255,.26)}
+#svDel.arm{background:#e5362b}
+.sv-hd button[hidden],#svViews[hidden]{display:none}
+#svTap{position:absolute;inset:0;z-index:2;touch-action:none;-webkit-user-select:none;user-select:none;cursor:pointer}
+.sv-cap{position:absolute;left:0;right:0;bottom:86px;z-index:3;padding:10px 20px;text-align:center;color:#fff;font-size:.98rem;text-shadow:0 1px 10px rgba(0,0,0,.7);pointer-events:none}
+.sv-cap:empty{display:none}
+.sv-ft{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;align-items:center;gap:8px;padding:30px 12px 16px;background:linear-gradient(transparent,rgba(0,0,0,.6))}
+.sv-reply{flex:1;display:flex;align-items:center;gap:4px;min-width:0}
+.sv-reply[hidden]{display:none}
+#svReply{flex:1;min-width:0;padding:11px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:inherit;font-size:.9rem;outline:none;transition:border-color .2s}
+#svReply:focus{border-color:#fff}
+#svReply::placeholder{color:rgba(255,255,255,.7)}
+.sv-rx{display:flex}
+.sv-rx button{border:0;background:none;font-size:1.45rem;cursor:pointer;padding:2px 3px;transition:transform .18s cubic-bezier(.2,1.6,.4,1)}
+.sv-rx button:hover{transform:scale(1.25) translateY(-2px)}
+.sv-rx button.on{transform:scale(1.2);filter:drop-shadow(0 0 8px rgba(255,255,255,.7))}
+#svList{position:absolute;left:10px;right:10px;bottom:74px;z-index:5;max-height:55%;overflow:auto;padding:14px;border-radius:20px;background:rgba(16,21,52,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,.12);color:#fff;animation:sheetIn .25s cubic-bezier(.2,1.2,.3,1)}
+#svList[hidden]{display:none}
+#svList b{display:block;margin-bottom:8px}
+.svl-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:.9rem}
+.svl-row .pa{width:32px;height:32px}
+.svl-row span{flex:1}
+.svl-row small{opacity:.65;font-size:.74rem}
+#sv.hold .sv-hd,#sv.hold .sv-ft,#sv.hold .sv-bars,#sv.hold .sv-cap{opacity:0}
+.sv-hd,.sv-ft,.sv-bars,.sv-cap{transition:opacity .2s}
+.sv-nav{position:absolute;top:50%;z-index:6;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:1.3rem;cursor:pointer;transform:translateY(-50%);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:background .2s}
+.sv-nav:hover{background:rgba(255,255,255,.28)}
+#svPrevB{left:calc(50% - 280px)}#svNextB{right:calc(50% - 280px)}
+@media(max-width:700px){.sv-card{width:100vw;height:100%;max-height:none;border-radius:0}.sv-nav{display:none}}
+/* story composer + clear-history dialog */
+#sc,#hm{position:fixed;inset:0;z-index:66;display:grid;place-items:center;background:rgba(3,5,14,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .2s}
+#sc[hidden],#hm[hidden]{display:none}
+.sc-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.sc-hd b{margin:0!important}
+.sc-tabs{display:flex;gap:4px;padding:3px;border-radius:999px;background:rgba(255,255,255,.06)}
+.sc-tabs button{border:0;border-radius:999px;padding:7px 14px;background:none;color:#c9d0f5;font:inherit;font-size:.85rem;cursor:pointer;transition:background .2s,color .2s}
+.sc-tabs button.on{background:linear-gradient(120deg,var(--c1),var(--c2));color:#071030;font-weight:600}
+.sc-prev{position:relative;height:min(46vh,360px);border-radius:20px;overflow:hidden;display:grid;place-items:center;background:#05060f;transition:background .35s}
+#scText{width:100%;height:100%;padding:30px;border:0;background:transparent;resize:none;outline:none;color:#fff;font:600 1.5rem/1.25 "Space Grotesk",system-ui,sans-serif;text-align:center;display:block;text-shadow:0 2px 18px rgba(0,0,0,.3)}
+#scText::placeholder{color:rgba(255,255,255,.7)}
+#scText[hidden]{display:none}
+#scImg{width:100%;height:100%;object-fit:contain;animation:svText .4s ease}
+#scImg[hidden],#scPick[hidden]{display:none}
+#scPick{border:1px dashed rgba(255,255,255,.35);background:rgba(255,255,255,.05);color:#e8ecff;border-radius:16px;padding:16px 22px;font:inherit;cursor:pointer}
+.sc-bgs{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.sc-bgs[hidden]{display:none}
+.sc-bgs button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .2s}
+.sc-bgs button.on{border-color:#fff;transform:scale(1.12)}
+.sc-act{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px}
+.sc-note{font-size:.76rem;color:#97a1d3}
+.pm-box .go:disabled{opacity:.6;cursor:default}
+#scCap[hidden]{display:none}
+.hr{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.1);margin:8px 0;cursor:pointer;font-size:.92rem;transition:border-color .2s,background .2s}
+.hr:has(input:checked){border-color:var(--c1);background:rgba(255,255,255,.05)}
+.pm-box .hr input{display:inline-block;width:18px;height:18px;margin:0;padding:0;accent-color:var(--c1)}
+.pm-box .sw input{padding:0;margin:0;border:0}
+.pm-box .sp-row{margin-top:6px}
+.holdb{position:relative;overflow:hidden;background:rgba(239,68,68,.14)!important;border-color:rgba(248,113,113,.55)!important;color:#fecaca!important;font-weight:600;user-select:none;-webkit-user-select:none;touch-action:none}
+.holdb i{position:absolute;inset:0;width:0;background:linear-gradient(90deg,#ef4444,#f97316);opacity:.65}
+.holdb.on i{width:100%;transition:width 1.3s linear}
+.holdb span{position:relative}
+#hmMsg{font-size:.82rem;color:#97a1d3;margin:10px 0 0;min-height:1.2em}
+.danger-btn{border-color:rgba(248,113,113,.5)!important;color:#fecaca!important}
+#stry{background:linear-gradient(180deg,rgba(8,11,28,.55),rgba(8,11,28,.25));border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:8px}
+.pm-box input[hidden]{display:none!important}
+.sc-hd b{font-size:1.15rem!important;white-space:nowrap}
+.sc-tabs button{white-space:nowrap}
+@media(max-width:420px){.sc-tabs button{padding:7px 10px;font-size:.8rem}.sc-hd{gap:6px}}
+@media(max-width:620px){#stry{padding:8px 12px 2px}.sti{width:56px}.sti .sring{width:52px;height:52px}.sti .plus{left:36px;top:34px}}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
@@ -921,7 +1062,7 @@ footer.ft #gate input{font-family:var(--mono)}
 <footer class="ft">
   <div class="ft-word" aria-hidden="true">QUANTA</div>
   <div class="w2 ft-row">
-    <span>&copy; 2026 Quanta · v23</span>
+    <span>&copy; 2026 Quanta · v24</span>
     <span class="ft-links"><a href="#ideas">Ideas</a><a href="#lab">Experiment</a><a href="#numbers">Numbers</a><a href="#history">History</a></span>
     <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
   </div>
@@ -930,6 +1071,7 @@ footer.ft #gate input{font-family:var(--mono)}
 <div id="chat" aria-hidden="true">
   <div class="cbg" aria-hidden="true"><i></i><i></i><i></i></div>
   <div id="top"><div class="tl1"><b class="brand"><i class="qlogo" aria-hidden="true"></i><span>Quanta</span></b><span id="st">connecting…</span><button id="pb" type="button">0 online</button><span id="ghostTag" hidden title="Ghost mode: others see you as offline">👻<em>Ghost</em></span></div><div class="tr1"><button id="srB" class="hic" type="button" title="Search messages" aria-label="Search messages"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button><button id="setB" class="hic" type="button" title="Settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg></button><div id="meav" class="av" role="button" tabindex="0" title="Click to change your profile photo (Shift+click removes it)"></div><input id="pf" type="file" accept="image/*" hidden><button id="close">Close</button></div><div id="srch"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="srq" placeholder="Search messages" autocomplete="off" aria-label="Search messages"><span id="srn"></span><button id="srUp" type="button" title="Older match" aria-label="Older match">↑</button><button id="srDn" type="button" title="Newer match" aria-label="Newer match">↓</button><button id="srX" type="button" title="Close search" aria-label="Close search">✕</button></div></div>
+  <div id="stry"><div id="stl"></div></div>
   <div id="pinbar" hidden><span class="pi">📌</span><div><b>Pinned message</b><span id="pinT"></span></div><button id="pinX" type="button" title="Unpin" aria-label="Unpin" hidden>✕</button></div>
   <div id="pl" hidden></div>
   <div id="msgs"></div>
@@ -953,13 +1095,15 @@ footer.ft #gate input{font-family:var(--mono)}
     <div class="sp-sec"><span class="sp-l">Notifications &amp; effects</span>
       <label class="sp-row"><span>Message sounds<small>A soft ping for new messages while you are away</small></span><span class="sw"><input type="checkbox" id="tSound"><i></i></span></label>
       <label class="sp-row"><span>Desktop notifications<small>Pop-ups when the tab is in the background</small></span><span class="sw"><input type="checkbox" id="tNotify"><i></i></span></label>
+      <label class="sp-row"><span>Animated stickers &amp; emoji<small>Turn off on slow phones: stickers stay still</small></span><span class="sw"><input type="checkbox" id="tAnim"><i></i></span></label>
+      <label class="sp-row"><span>Living background<small>Slowly moving colour glow behind the chat</small></span><span class="sw"><input type="checkbox" id="tBg"><i></i></span></label>
       <label class="sp-row"><span>Animated effects<small>Confetti, hearts and bursts for emoji and reactions</small></span><span class="sw"><input type="checkbox" id="tFx"><i></i></span></label>
     </div>
     <div id="adm" hidden><span class="sp-l">Admin</span>
       <label class="sp-row"><span>👻 Ghost mode<small>Read the chat while everyone sees you as offline. No typing or “seen” ticks are sent.</small></span><span class="sw"><input type="checkbox" id="ghostC"><i></i></span></label>
-      <div class="sp-btns"><button id="rf" type="button">↻ Refresh all</button><button id="cl" type="button">🧹 Clean media</button></div>
+      <div class="sp-btns"><button id="rf" type="button">↻ Refresh all</button><button id="cl" type="button">🧹 Clean media</button><button id="hClear" type="button" class="sp-btn danger-btn">🗑 Clear chat history</button></div>
     </div>
-    <p class="sp-hint">Formatting: **bold**, __italic__, ~~strike~~, `code`, ||spoiler||, @name. Double-tap a message for ❤️, swipe left to reply.</p>
+    <p class="sp-hint">Formatting: **bold**, __italic__, ~~strike~~, `code`, ||spoiler||, @name. Double-tap a message for ❤️, swipe left to reply, long-press for more. Admins can delete any message.</p>
   </aside>
 </div>
 
@@ -1250,6 +1394,10 @@ footer.ft #gate input{font-family:var(--mono)}
 <div id="attm" hidden><button type="button" id="aMedia"><span style="background:linear-gradient(135deg,#7cf0ff,#60a5fa)">🖼️</span>Photo or video</button><button type="button" id="aPoll"><span style="background:linear-gradient(135deg,#f0abfc,#a78bfa)">📊</span>Poll</button></div>
 <div id="pollm" hidden><div class="pm-box" role="dialog" aria-label="New poll"><b>📊 New poll</b><input id="pq" maxlength="140" placeholder="Ask a question"><div id="pos"></div><div class="pm-act"><button type="button" class="sp-btn" id="pCancel">Cancel</button><button type="button" class="sp-btn go" id="pGo">Create poll</button></div></div></div>
 <div id="toast" hidden role="status"></div>
+<div id="sv" hidden><div class="sv-bg" id="svBg"></div><button class="sv-nav" id="svPrevB" type="button" aria-label="Previous story">‹</button><div class="sv-card" id="svCard"><div class="sv-media" id="svMedia"></div><div id="svTap"></div><div class="sv-cap" id="svCap"></div><div class="sv-bars" id="svBars"></div><div class="sv-hd"><span class="pa" id="svAv"></span><div class="sv-who"><b id="svName"></b><small id="svTime"></small></div><button id="svDel" type="button" title="Delete story" hidden>🗑</button><button id="svX" type="button" title="Close" aria-label="Close stories">✕</button></div><div id="svList" hidden></div><div class="sv-ft"><button id="svViews" type="button" hidden>👁 0</button><div class="sv-reply" id="svReplyBox"><input id="svReply" maxlength="300" placeholder="Reply…" autocomplete="off"><div class="sv-rx"><button type="button">❤️</button><button type="button">🔥</button><button type="button">😂</button><button type="button">😮</button><button type="button">👏</button></div></div></div></div><button class="sv-nav" id="svNextB" type="button" aria-label="Next story">›</button></div>
+<div id="sc" hidden><div class="pm-box" role="dialog" aria-label="New story"><div class="sc-hd"><b>✨ New story</b><div class="sc-tabs"><button type="button" data-k="text" class="on">Aa Text</button><button type="button" data-k="photo">🖼 Photo</button></div><button type="button" class="sp-btn" id="scX" aria-label="Close">✕</button></div><div class="sc-prev" id="scPrev"><textarea id="scText" maxlength="220" placeholder="Type something…"></textarea><img id="scImg" hidden alt=""><button type="button" id="scPick" hidden>🖼 Choose a photo</button></div><div class="sc-bgs" id="scBgs"></div><input id="scCap" maxlength="120" placeholder="Add a caption…" hidden><input type="file" id="scFile" accept="image/*" hidden><div class="sc-act"><span class="sc-note">Visible to everyone for 24 hours</span><button type="button" class="sp-btn go" id="scGo">Share story</button></div></div></div>
+<div id="hm" hidden><div class="pm-box" role="dialog" aria-label="Clear chat history"><b>🗑 Clear chat history</b><p class="sp-hint">Deletes messages and their photos, videos and voice notes for everyone. This cannot be undone.</p><label class="hr"><input type="radio" name="hmw" value="all" checked><span>All messages</span></label><label class="hr"><input type="radio" name="hmw" value="7"><span>Messages older than 7 days</span></label><label class="hr"><input type="radio" name="hmw" value="1"><span>Messages older than 24 hours</span></label><label class="sp-row"><span>Also delete all stories</span><span class="sw"><input type="checkbox" id="hmSt"><i></i></span></label><p id="hmMsg"></p><div class="pm-act"><button type="button" class="sp-btn" id="hmX">Cancel</button><button type="button" class="sp-btn holdb" id="hmGo"><i></i><span>Hold to delete</span></button></div></div></div>
+
 <div id="call" hidden>
   <video id="cRemote" autoplay playsinline></video>
   <div id="cInfo"><div id="cAv"></div><div id="cName"></div><div id="cStat"></div></div>
@@ -1556,8 +1704,9 @@ function openMenu(key, m, anchor) {
   const act = (label, fn, cls) => { const b = document.createElement("button"); b.type = "button"; b.className = "act " + (cls || ""); b.textContent = label; b.onclick = fn; mm.append(b); return b; };
   act("↩ Reply", () => { startReply(key, m); mm.hidden = true; });
   tgMenu(act, key, m);
-  if (m.uid ? m.uid === myUid() : m.name === getName()) {
-    act("✎ Edit", () => { editing = { key, media: !!(m.image || m.video) }; $("txt").value = m.text || ""; renderCtx(); $("txt").focus(); mm.hidden = true; });
+  const mineM = m.uid ? m.uid === myUid() : m.name === getName();
+  if (mineM && !m.poll) act("✎ Edit", () => { editing = { key, media: !!(m.image || m.video) }; $("txt").value = m.text || ""; renderCtx(); $("txt").focus(); mm.hidden = true; });
+  if (mineM || localStorage.getItem("chatAdmin") === "1") {
     const d = act("🗑 Delete", () => {
       if (!d.dataset.arm) { d.dataset.arm = "1"; d.textContent = "Tap again to delete"; return; }
       db.ref("messages/" + key).remove(); if (m.video && m.video.id) db.ref("media/" + m.video.id).remove(); if (m.voice && m.voice.id) db.ref("media/" + m.voice.id).remove(); if (m.round && m.round.id) db.ref("media/" + m.round.id).remove(); if (m.agif && m.agif.id) db.ref("media/" + m.agif.id).remove(); const pid = imgId(m.image); if (pid) db.ref("media/" + pid).remove(); mm.hidden = true;
@@ -1822,7 +1971,7 @@ function redrawMsg(sn) {
 }
 function dropMsg(sn) {
   addQ = addQ.filter(x => x.key !== sn.key);
-  const o = document.getElementById("m-" + sn.key); if (o) { o.removeAttribute("id"); o.classList.add("gone"); setTimeout(() => { o.remove(); relayDays(); regroup(); }, 190); }
+  const o = document.getElementById("m-" + sn.key); if (o) { o.removeAttribute("id"); o.classList.add("gone"); setTimeout(() => { o.remove(); relayDays(); regroup(); const bx = $("msgs"); if (!bx.querySelector(".m") && !bx.querySelector(".empty")) { bx.insertAdjacentHTML("beforeend", '<div class="empty">No messages yet. Say hello.</div>'); setMore("none"); } }, 190); }
 }
 function setMore(s) {
   moreState = s; const b = $("more"); if (!b) return;
@@ -1933,7 +2082,7 @@ function epShow(t) {
     b.onclick = () => { const x = $("txt"), a = x.selectionStart ?? x.value.length, z = x.selectionEnd ?? a; x.value = x.value.slice(0, a) + e + x.value.slice(z); x.focus(); x.selectionStart = x.selectionEnd = a + e.length; x.dispatchEvent(new Event("input")); };
     body.append(b);
   });
-  else if (t === "s") { body.className = "st"; STK.forEach(e => { const b = document.createElement("button"); b.type = "button"; b.title = e; b.append(animEmoji(e, 58)); b.onclick = () => { stk = e; sendQuiet(); }; body.append(b); }); }
+  else if (t === "s") { body.className = "st"; STK.forEach(e => { const b = document.createElement("button"); b.type = "button"; b.title = e; const th = document.createElement("span"); th.className = "aemo txt still"; th.style.setProperty("--s", "54px"); th.textContent = e; b.append(th); b.onpointerenter = () => { if (TG.anim !== false && b.firstChild === th) th.replaceWith(animEmoji(e, 54)); }; b.onclick = () => { stk = e; sendQuiet(); }; body.append(b); }); }
   else if (!GIPHY_KEY) { body.className = "nt"; body.textContent = "GIF search needs a free GIPHY key: create one at developers.giphy.com and put it in GIPHY_KEY at the top of the script. You can always send your own GIF with the paperclip button."; }
   else gifLoad($("gq").value.trim());
 }
@@ -2064,6 +2213,7 @@ const notoBad = new Set();
 function animEmoji(e, size, cls) {
   const w = document.createElement("span"); w.className = "aemo " + (cls || ""); w.style.setProperty("--s", size + "px");
   const txt = () => { w.classList.add("txt"); w.textContent = e; };
+  if (TG.anim === false) { txt(); w.classList.add("still"); return w; }
   if (notoBad.has(e)) { txt(); return w; }
   const img = new Image(); img.alt = e; img.decoding = "async"; img.loading = "lazy"; img.draggable = false; let step = 0;
   img.onerror = () => { if (!step && /️/.test(e)) { step = 1; img.src = notoUrl(e, false); } else { notoBad.add(e); img.remove(); txt(); } };
@@ -2132,26 +2282,35 @@ function renderPoll(key, p) {
 
 // ---------- gestures: double-tap ❤️, long-press menu, swipe left to reply ----------
 function startReply(key, m) { replyTo = { id: key, name: m.name, text: m.text || m.sticker || (m.poll ? "📊 " + m.poll.q : "") }; renderCtx(); $("txt").focus(); }
+function heart(key, b) { if (Date.now() - (TG.hAt || 0) < 500) return; TG.hAt = Date.now(); if (getSelection) getSelection().removeAllRanges(); popBig(b, "❤️"); react(key, "❤️"); }
+// gestures with pointer events (finger, pen and mouse): double-tap ❤️, long-press menu, swipe left to reply
 function wireMsg(el, b, key, m) {
-  b.addEventListener("dblclick", ev => {
-    if (ev.target.closest("button,a,.spoiler,video,audio,.voice,.rnd,input")) return;
-    ev.preventDefault(); if (getSelection) getSelection().removeAllRanges();
-    popBig(b, "❤️"); react(key, "❤️");
+  b.addEventListener("dblclick", ev => { if (ev.target.closest("button,a,.spoiler,video,audio,.voice,.rnd,input")) return; ev.preventDefault(); heart(key, b); });
+  let sx = 0, sy = 0, dx = 0, lp = 0, sw = false, pid = null, moved = false;
+  const skip = t => t.closest("button,a,input,video,audio,.voice,.rnd,.spoiler,.popt,.vbar,.rx");
+  el.addEventListener("pointerdown", ev => {
+    if (ev.button !== 0 || skip(ev.target)) return;
+    pid = ev.pointerId; sx = ev.clientX; sy = ev.clientY; dx = 0; sw = false; moved = false; clearTimeout(lp);
+    if (ev.pointerType !== "mouse") lp = setTimeout(() => { if (!sw && !moved && pid !== null) { TG.lpAt = Date.now(); if (navigator.vibrate) navigator.vibrate(12); openMenu(key, m, b); } }, 480);
   });
-  let sx = 0, sy = 0, dx = 0, lp = 0, sw = false;
-  el.addEventListener("touchstart", ev => { const t = ev.touches[0]; sx = t.clientX; sy = t.clientY; dx = 0; sw = false; clearTimeout(lp); lp = setTimeout(() => { if (!sw) { if (navigator.vibrate) navigator.vibrate(12); openMenu(key, m, b); } }, 480); }, { passive: true });
-  el.addEventListener("touchmove", ev => {
-    const t = ev.touches[0], mx = t.clientX - sx, my = t.clientY - sy;
-    if (Math.abs(mx) > 8 || Math.abs(my) > 8) clearTimeout(lp);
-    if (!sw && mx < -12 && Math.abs(mx) > Math.abs(my) * 1.6) sw = true;
-    if (sw) { dx = Math.max(-84, Math.min(0, mx)); el.style.transform = "translateX(" + dx + "px)"; el.classList.toggle("swok", dx < -56); }
-  }, { passive: true });
-  const end = () => {
-    clearTimeout(lp); if (!sw) return; sw = false;
-    el.style.transition = "transform .28s cubic-bezier(.2,1.3,.4,1)"; el.style.transform = ""; setTimeout(() => { el.style.transition = ""; }, 300);
-    el.classList.remove("swok"); if (dx < -56) { if (navigator.vibrate) navigator.vibrate(10); startReply(key, m); }
+  el.addEventListener("pointermove", ev => {
+    if (ev.pointerId !== pid) return;
+    const mx = ev.clientX - sx, my = ev.clientY - sy;
+    if (Math.abs(mx) > 8 || Math.abs(my) > 8) { moved = true; clearTimeout(lp); }
+    if (!sw && mx < -14 && Math.abs(mx) > Math.abs(my) * 1.4) { sw = true; try { el.setPointerCapture(pid); } catch (e) {} if (getSelection) getSelection().removeAllRanges(); el.classList.add("swiping"); }
+    if (sw) { ev.preventDefault(); dx = Math.max(-90, Math.min(0, mx)); el.style.transform = "translateX(" + dx + "px)"; el.classList.toggle("swok", dx < -58); }
+  });
+  const end = ev => {
+    if (ev.pointerId !== pid) return; pid = null; clearTimeout(lp);
+    if (!sw) {
+      if (ev.type === "pointerup" && ev.pointerType !== "mouse" && !moved && !skip(ev.target)) { const now = Date.now(); if (now - (el._tap || 0) < 320) { el._tap = 0; heart(key, b); } else el._tap = now; }
+      return;
+    }
+    sw = false; el.classList.remove("swiping"); const ok = dx < -58; el.classList.remove("swok");
+    el.style.transition = "transform .32s cubic-bezier(.2,1.3,.4,1)"; el.style.transform = ""; setTimeout(() => { el.style.transition = ""; }, 340);
+    if (ok) { TG.lpAt = Date.now(); if (navigator.vibrate) navigator.vibrate(10); startReply(key, m); }
   };
-  el.addEventListener("touchend", end); el.addEventListener("touchcancel", end);
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
 }
 
 // ---------- effects ----------
@@ -2233,6 +2392,7 @@ function tgMenu(act, key, m) {
   }
 }
 function tgStart() {
+  stListen();
   db.ref("control/pin").on("value", sn => {
     const v = sn.val(); TG.pin = v && v.id ? v : null; $("pinbar").hidden = !TG.pin; $("chat").classList.toggle("haspin", !!TG.pin);
     if (TG.pin) $("pinT").textContent = (TG.pin.name ? TG.pin.name + ": " : "") + (TG.pin.text || "Message");
@@ -2342,6 +2502,286 @@ function sheet(id, on) { const el = $(id); el.hidden = on === undefined ? !el.hi
     if ($("top").classList.contains("searching")) { srOpen(false); e.stopImmediatePropagation(); }
   }, true);
   updFab();
+})();
+</script>
+<script id="tg2">
+// ===== v24: stories, admin history tools, extra settings =====
+const SBG = ["linear-gradient(135deg,#7cf0ff,#a78bfa)", "linear-gradient(135deg,#fde68a,#f472b6)", "linear-gradient(135deg,#5eead4,#3b82f6)", "linear-gradient(135deg,#f0abfc,#6366f1)", "linear-gradient(160deg,#1e293b,#0f172a)", "linear-gradient(135deg,#fb923c,#e11d48)", "radial-gradient(circle at 30% 20%,#a78bfa,#1e1b4b)", "linear-gradient(135deg,#4ade80,#0ea5e9)"];
+const DAY = 864e5;
+const ST = { list: [], byUser: new Map(), order: [], cur: null, curId: "", idx: 0, t0: 0, el: 0, dur: 5000, paused: false, loading: false, raf: 0, kind: "text", img: null, bg: 0, err: false, pd: null };
+const seenSet = new Set((() => { try { return JSON.parse(localStorage.getItem("seenStories") || "[]"); } catch (e) { return []; } })());
+const seenS = s => seenSet.has(s.id) || !!(s.views && s.views[myUid()]);
+const storyMedia = s => s && s.media && s.media.id ? [s.media.id] : [];
+
+function stGroup() {
+  const live = ST.list.filter(s => (s.ts || 0) > nowMs() - DAY), by = new Map();
+  live.sort((a, b) => (a.ts || 0) - (b.ts || 0)).forEach(s => { if (!by.has(s.uid)) by.set(s.uid, { uid: s.uid, name: s.name || "?", items: [] }); const g = by.get(s.uid); g.items.push(s); g.name = s.name || g.name; });
+  ST.byUser = by;
+  const others = [...by.values()].filter(g => g.uid !== myUid()).sort((a, b) => (a.items.every(seenS) - b.items.every(seenS)) || (b.items[b.items.length - 1].ts - a.items[a.items.length - 1].ts));
+  ST.order = (by.has(myUid()) ? [myUid()] : []).concat(others.map(g => g.uid));
+}
+function stItem(uid, name, label, has, allSeen, mine) {
+  const b = document.createElement("button"); b.type = "button"; b.className = "sti" + (has ? (allSeen ? " seen" : " new") : "") + (mine ? " mine" : "");
+  b.title = mine ? (has ? "Your story" : "Add a story") : name + "'s story";
+  const ring = document.createElement("span"), a = document.createElement("span"); ring.className = "sring"; a.className = "pa"; a.dataset.n = name; paintAv(a, name); ring.append(a); b.append(ring);
+  if (mine) { const p = document.createElement("i"); p.className = "plus"; p.textContent = "+"; p.title = "Add a story"; p.onclick = ev => { ev.stopPropagation(); scOpen(); }; b.append(p); }
+  const l = document.createElement("em"); l.textContent = label; b.append(l);
+  b.onclick = () => has ? svOpen(uid) : scOpen();
+  return b;
+}
+function stBar() {
+  const box = $("stl"); if (!box) return; box.innerHTML = "";
+  const me = ST.byUser.get(myUid());
+  box.append(stItem(myUid(), getName(), "Your story", !!me, me ? me.items.every(seenS) : true, true));
+  ST.order.filter(u => u !== myUid()).forEach(u => { const g = ST.byUser.get(u); box.append(stItem(u, g.name, g.name, true, g.items.every(seenS), false)); });
+  $("stry").classList.toggle("nost", ST.order.filter(u => u !== myUid()).length === 0);
+}
+function stListen() {
+  stBar();
+  db.ref("stories").orderByKey().startAt(keyUpTo(nowMs() - DAY)).on("value", sn => {
+    const arr = []; sn.forEach(c => { const v = c.val(); if (v && v.uid) arr.push(Object.assign({ id: c.key }, v)); });
+    ST.list = arr; ST.err = false; stGroup(); stBar(); if (!$("sv").hidden) stRefreshOpen();
+  }, () => { ST.err = true; stBar(); });
+  setInterval(() => { stGroup(); stBar(); }, 60000);
+  // anyone may tidy up stories that already expired (24 h)
+  setTimeout(() => {
+    db.ref("stories").orderByKey().endAt(keyUpTo(nowMs() - DAY)).limitToFirst(40).once("value").then(sn => {
+      const ups = {}; sn.forEach(c => { const v = c.val() || {}; if ((v.ts || 0) > nowMs() - DAY) return; ups["stories/" + c.key] = null; storyMedia(v).forEach(id => { ups["media/" + id] = null; }); });
+      if (Object.keys(ups).length) db.ref().update(ups).catch(() => {});
+    }).catch(() => {});
+  }, 8000);
+}
+
+// ---------- story composer ----------
+function scTab(k) {
+  ST.kind = k; document.querySelectorAll(".sc-tabs button").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+  $("scText").hidden = k !== "text"; $("scBgs").hidden = k !== "text"; $("scCap").hidden = k !== "photo";
+  $("scImg").hidden = !(k === "photo" && ST.img); $("scPick").hidden = !(k === "photo" && !ST.img);
+  $("scPrev").style.background = k === "text" ? SBG[ST.bg] : "#05060f";
+}
+function scOpen() {
+  if (!db) return;
+  if (ST.err) return toast("Stories need a 'stories' rule in Firebase");
+  ST.img = null; $("scText").value = ""; $("scCap").value = ""; $("scImg").removeAttribute("src"); $("scGo").disabled = false; $("scGo").textContent = "Share story";
+  scTab("text"); $("sc").hidden = false; setTimeout(() => $("scText").focus(), 80);
+}
+async function scShare() {
+  const go = $("scGo"); if (go.disabled) return;
+  const data = { uid: myUid(), name: getName(), ts: firebase.database.ServerValue.TIMESTAMP, type: ST.kind };
+  let mid = "";
+  if (ST.kind === "text") {
+    const t = $("scText").value.trim(); if (!t) { $("scText").focus(); return toast("Write something first"); }
+    data.text = t.slice(0, 220); data.bg = ST.bg;
+  } else {
+    if (!ST.img) return $("scFile").click();
+    const c = $("scCap").value.trim(); if (c) data.text = c.slice(0, 120);
+  }
+  go.disabled = true; go.textContent = "Sharing…";
+  try {
+    if (ST.kind === "photo") { mid = db.ref("media").push().key; await putMedia(mid, dataBlob(ST.img.data), "image/jpeg"); data.media = { id: mid, w: ST.img.w, h: ST.img.h }; }
+    await db.ref("stories").push(data);
+    $("sc").hidden = true; toast("✨ Story shared"); burstAt($("stl").firstElementChild, ["✨", "⭐", "💫"], 12);
+  } catch (err) {
+    if (mid) db.ref("media/" + mid).remove().catch(() => {});
+    go.disabled = false; go.textContent = "Share story";
+    toast(err && err.code === "PERMISSION_DENIED" ? "Firebase refused: add the 'stories' rule" : "Could not share (" + ((err && (err.code || err.message)) || "error") + ")");
+  }
+}
+
+// ---------- story viewer ----------
+function svOpen(uid) {
+  const g = ST.byUser.get(uid); if (!g) return;
+  ST.cur = uid; const f = g.items.findIndex(s => !seenS(s)); ST.idx = f < 0 ? 0 : f;
+  $("sv").hidden = false; $("svList").hidden = true; svShow(true);
+  if (!ST.raf) ST.raf = requestAnimationFrame(svTick);
+}
+function svClose() {
+  $("sv").hidden = true; cancelAnimationFrame(ST.raf); ST.raf = 0; ST.cur = null; ST.curId = ""; $("svReply").blur(); stGroup(); stBar();
+}
+function svMarkSeen(s) {
+  if (seenSet.has(s.id)) return; seenSet.add(s.id);
+  try { localStorage.setItem("seenStories", JSON.stringify([...seenSet].slice(-400))); } catch (e) {}
+  if (s.uid !== myUid() && !isGhost()) db.ref("stories/" + s.id + "/views/" + myUid()).set({ n: getName(), t: firebase.database.ServerValue.TIMESTAMP }).catch(() => {});
+}
+function svViewsUpd(s) {
+  const v = s.views || {}, n = Object.keys(v).filter(u => u !== myUid()).length, likes = Object.keys(s.likes || {}).length;
+  $("svViews").textContent = "👁 " + n + (likes ? "  ❤️ " + likes : "");
+}
+function svShow(fresh) {
+  const g = ST.byUser.get(ST.cur); if (!g) return svClose();
+  ST.idx = Math.max(0, Math.min(ST.idx, g.items.length - 1)); const s = g.items[ST.idx]; if (!s) return svClose();
+  ST.curId = s.id;
+  $("svBars").innerHTML = g.items.map((x, i) => '<i><b style="width:' + (i < ST.idx ? 100 : 0) + '%"></b></i>').join("");
+  paintAv($("svAv"), g.name); $("svAv").dataset.n = g.name; $("svName").textContent = g.name; $("svTime").textContent = ago(s.ts || nowMs());
+  const mine = s.uid === myUid();
+  $("svDel").hidden = !(mine || isAdmin()); $("svDel").classList.remove("arm"); $("svDel").textContent = "🗑";
+  $("svViews").hidden = !mine; svViewsUpd(s); $("svReplyBox").hidden = mine; $("svList").hidden = true;
+  $("svReply").placeholder = "Reply to " + g.name + "…";
+  const myLike = (s.likes || {})[myUid()]; document.querySelectorAll(".sv-rx button").forEach(b => b.classList.toggle("on", b.textContent === myLike));
+  const md = $("svMedia"); md.innerHTML = ""; md.style.background = ""; $("svCap").textContent = "";
+  ST.el = 0; ST.t0 = performance.now(); ST.loading = false;
+  if (s.type === "photo" && s.media && s.media.id) {
+    ST.loading = true; ST.dur = 6000; const ld = document.createElement("div"); ld.className = "sv-load"; ld.textContent = "Loading…"; md.append(ld);
+    $("svBg").style.backgroundImage = "";
+    loadImgUrl(s.media.id).then(u => {
+      if (ST.curId !== s.id) return; const im = document.createElement("img"); im.alt = ""; im.src = u; md.innerHTML = ""; md.append(im);
+      $("svBg").style.backgroundImage = 'url("' + u + '")'; ST.loading = false; ST.paused = false; ST.t0 = performance.now(); ST.el = 0;
+    }).catch(() => { if (ST.curId === s.id) { ld.textContent = "Photo unavailable"; ST.loading = false; ST.paused = false; } });
+    if (s.text) $("svCap").textContent = s.text;
+  } else {
+    const t = String(s.text || ""); md.style.background = SBG[(+s.bg || 0) % SBG.length]; $("svBg").style.backgroundImage = SBG[(+s.bg || 0) % SBG.length];
+    const d = document.createElement("div"); d.className = "sv-text"; d.style.fontSize = t.length < 30 ? "2.3rem" : t.length < 90 ? "1.7rem" : "1.25rem"; d.textContent = t; md.append(d);
+    ST.dur = 5000 + Math.min(5000, t.length * 35);
+  }
+  ST.paused = false; svMarkSeen(s);
+}
+function svTick(now) {
+  if ($("sv").hidden) { ST.raf = 0; return; }
+  ST.raf = requestAnimationFrame(svTick);
+  if (ST.paused || ST.loading || ST.pd || document.activeElement === $("svReply") || !$("svList").hidden) { ST.t0 = now - ST.el; return; }
+  ST.el = now - ST.t0; const p = Math.min(1, ST.el / ST.dur), b = $("svBars").children[ST.idx];
+  if (b) b.firstChild.style.width = (p * 100).toFixed(2) + "%";
+  if (p >= 1) svNext();
+}
+function svNext() {
+  const g = ST.byUser.get(ST.cur);
+  if (g && ST.idx < g.items.length - 1) { ST.idx++; return svShow(); }
+  const i = ST.order.indexOf(ST.cur), nu = ST.order[i + 1];
+  if (nu && ST.byUser.get(nu)) { ST.cur = nu; const ng = ST.byUser.get(nu), f = ng.items.findIndex(s => !seenS(s)); ST.idx = f < 0 ? 0 : f; const c = $("svCard"); c.classList.remove("swp"); void c.offsetWidth; c.classList.add("swp"); return svShow(); }
+  svClose();
+}
+function svPrev() {
+  if (ST.idx > 0) { ST.idx--; return svShow(); }
+  const i = ST.order.indexOf(ST.cur), pu = ST.order[i - 1];
+  if (pu && ST.byUser.get(pu)) { ST.cur = pu; ST.idx = ST.byUser.get(pu).items.length - 1; const c = $("svCard"); c.classList.remove("swp"); void c.offsetWidth; c.classList.add("swp"); return svShow(); }
+  ST.t0 = performance.now(); ST.el = 0;
+}
+function stRefreshOpen() {
+  const g = ST.byUser.get(ST.cur); if (!g) return svClose();
+  const j = g.items.findIndex(s => s.id === ST.curId);
+  if (j < 0) { ST.idx = Math.min(ST.idx, g.items.length - 1); return svShow(); }
+  ST.idx = j; const s = g.items[j]; svViewsUpd(s);
+  if ($("svBars").children.length !== g.items.length) { const w = ST.el / ST.dur; $("svBars").innerHTML = g.items.map((x, i) => '<i><b style="width:' + (i < j ? 100 : i === j ? w * 100 : 0) + '%"></b></i>').join(""); }
+}
+function svList() {
+  const g = ST.byUser.get(ST.cur), s = g && g.items[ST.idx]; if (!s) return;
+  const L = $("svList"); if (!L.hidden) { L.hidden = true; return; }
+  L.innerHTML = ""; const h = document.createElement("b"); const vs = Object.entries(s.views || {}).filter(([u]) => u !== myUid());
+  h.textContent = vs.length ? "Viewed by " + vs.length : "No views yet"; L.append(h);
+  vs.sort((a, b) => ((b[1] && b[1].t) || 0) - ((a[1] && a[1].t) || 0)).forEach(([u, v]) => {
+    const r = document.createElement("div"); r.className = "svl-row"; const n = (v && v.n) || "Someone", a = document.createElement("span"); a.className = "pa"; a.dataset.n = n; paintAv(a, n);
+    const nm = document.createElement("span"); nm.textContent = n + ((s.likes || {})[u] ? "  " + s.likes[u] : ""); const t = document.createElement("small"); t.textContent = v && v.t ? ago(v.t) : "";
+    r.append(a, nm, t); L.append(r);
+  });
+  L.hidden = false;
+}
+function svDelete() {
+  const b = $("svDel"); if (!b.classList.contains("arm")) { b.classList.add("arm"); b.textContent = "Delete?"; ST.paused = true; setTimeout(() => { b.classList.remove("arm"); b.textContent = "🗑"; ST.paused = false; }, 3000); return; }
+  const g = ST.byUser.get(ST.cur), s = g && g.items[ST.idx]; if (!s) return;
+  const ups = { ["stories/" + s.id]: null }; storyMedia(s).forEach(id => { ups["media/" + id] = null; });
+  ST.paused = false; db.ref().update(ups).then(() => toast("Story deleted"), err => toast("Could not delete (" + (err.code || "error") + ")"));
+}
+function svLike(e, btn) {
+  const g = ST.byUser.get(ST.cur), s = g && g.items[ST.idx]; if (!s) return;
+  const r = db.ref("stories/" + s.id + "/likes/" + myUid()), on = (s.likes || {})[myUid()] === e;
+  (on ? r.remove() : r.set(e)).catch(() => toast("Could not react"));
+  if (!on) { burstAt(btn, [e], 12); popBig($("svCard"), e); }
+}
+function svSendReply() {
+  const g = ST.byUser.get(ST.cur), s = g && g.items[ST.idx], t = $("svReply").value.trim(); if (!s || !t) return;
+  replyTo = { id: "", name: g.name, text: "📖 Story" + (s.text ? ": " + s.text.slice(0, 50) : "") };
+  const keep = $("txt").value; $("txt").value = t; $("send").dispatchEvent(new Event("submit", { cancelable: true })); $("txt").value = keep;
+  $("svReply").value = ""; $("svReply").blur(); toast("Reply sent to the chat");
+}
+
+// ---------- admin: clear chat history ----------
+const msgMedia = m => [m.video, m.voice, m.round, m.agif].filter(x => x && x.id).map(x => x.id).concat(imgId(m.image) ? [imgId(m.image)] : []);
+async function chunkedUpdate(ups) { const ks = Object.keys(ups); for (let i = 0; i < ks.length; i += 400) { const part = {}; ks.slice(i, i + 400).forEach(k => { part[k] = null; }); await db.ref().update(part); } }
+async function clearHistory(mode, withStories) {
+  const ups = {}; let n = 0;
+  if (mode === "all") {
+    const ms = await db.ref("messages").once("value");
+    ms.forEach(c => { n++; msgMedia(c.val() || {}).forEach(id => { ups["media/" + id] = null; }); });
+    await db.ref("messages").remove();
+    await Promise.all([db.ref("control/pin").remove(), db.ref("reads").remove()]);
+  } else {
+    const cutoff = nowMs() - (+mode) * DAY, ms = await db.ref("messages").orderByKey().endAt(keyUpTo(cutoff)).once("value");
+    ms.forEach(c => { const m = c.val() || {}; if (m.createdAt && m.createdAt > cutoff) return; n++; ups["messages/" + c.key] = null; msgMedia(m).forEach(id => { ups["media/" + id] = null; }); });
+  }
+  if (withStories) {
+    const ss = await db.ref("stories").once("value");
+    ss.forEach(c => { ups["stories/" + c.key] = null; storyMedia(c.val()).forEach(id => { ups["media/" + id] = null; }); });
+  }
+  await chunkedUpdate(ups);
+  return n;
+}
+function hmOpen() { clearTimeout(window.hmT); $("setp").hidden = true; $("hmMsg").textContent = ""; document.querySelector('input[name="hmw"][value="all"]').checked = true; $("hmSt").checked = false; $("hm").hidden = false; }
+(function wireHold() {
+  const b = $("hmGo"); let t = 0;
+  const cancel = () => { clearTimeout(t); b.classList.remove("on"); };
+  b.addEventListener("pointerdown", ev => {
+    ev.preventDefault(); if (b.disabled) return; b.classList.add("on");
+    t = setTimeout(async () => {
+      b.classList.remove("on"); b.disabled = true; const mode = document.querySelector('input[name="hmw"]:checked').value, st = $("hmSt").checked;
+      $("hmMsg").textContent = "Deleting…";
+      try { const n = await clearHistory(mode, st); $("hmMsg").textContent = "Done: " + n + " message" + (n === 1 ? "" : "s") + " deleted."; screenFx("✨"); clearTimeout(window.hmT); window.hmT = setTimeout(() => { $("hm").hidden = true; }, 1200); }
+      catch (err) { $("hmMsg").textContent = "Failed (" + ((err && (err.code || err.message)) || "error") + ")."; }
+      b.disabled = false;
+    }, 1300);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(e => b.addEventListener(e, cancel));
+})();
+
+// ---------- wiring ----------
+(function tg2Init() {
+  SBG.forEach((g, i) => { const x = document.createElement("button"); x.type = "button"; x.style.background = g; x.title = "Background " + (i + 1); x.onclick = () => { ST.bg = i; document.querySelectorAll("#scBgs button").forEach((y, j) => y.classList.toggle("on", j === i)); scTab("text"); $("scText").focus(); }; $("scBgs").append(x); });
+  $("scBgs").firstElementChild.classList.add("on");
+  document.querySelectorAll(".sc-tabs button").forEach(b => b.onclick = () => { scTab(b.dataset.k); if (b.dataset.k === "photo" && !ST.img) $("scFile").click(); });
+  $("scPick").onclick = () => $("scFile").click();
+  $("scFile").onchange = async () => {
+    const f = $("scFile").files[0]; $("scFile").value = ""; if (!f) return;
+    try { const d = await compress(f, 1280, .8); ST.img = { data: d, w: compress.dims[0], h: compress.dims[1] }; $("scImg").src = d; scTab("photo"); }
+    catch (e) { toast("Could not read that image"); }
+  };
+  $("scX").onclick = () => { $("sc").hidden = true; };
+  $("sc").onclick = e => { if (e.target.id === "sc") $("sc").hidden = true; };
+  $("scGo").onclick = scShare;
+  const tap = $("svTap");
+  tap.addEventListener("pointerdown", e => { ST.pd = { t: performance.now(), x: e.clientX, y: e.clientY }; try { tap.setPointerCapture(e.pointerId); } catch (x) {} setTimeout(() => { if (ST.pd) $("sv").classList.add("hold"); }, 220); });
+  tap.addEventListener("pointerup", e => {
+    const d = ST.pd; ST.pd = null; $("sv").classList.remove("hold"); if (!d) return;
+    const dy = e.clientY - d.y, dx = e.clientX - d.x, dt = performance.now() - d.t;
+    if (dy > 90 && Math.abs(dy) > Math.abs(dx)) return svClose();
+    if (Math.abs(dx) > 70) return dx < 0 ? svNext() : svPrev();
+    if (dt < 260 && Math.abs(dx) < 12 && Math.abs(dy) < 12) { if (!$("svList").hidden) { $("svList").hidden = true; return; } const r = tap.getBoundingClientRect(); (e.clientX - r.left < r.width * .33) ? svPrev() : svNext(); }
+  });
+  tap.addEventListener("pointercancel", () => { ST.pd = null; $("sv").classList.remove("hold"); });
+  $("svX").onclick = svClose; $("svPrevB").onclick = svPrev; $("svNextB").onclick = svNext;
+  $("sv").addEventListener("click", e => { if (e.target.id === "sv" || e.target.id === "svBg") svClose(); });
+  $("svDel").onclick = svDelete; $("svViews").onclick = svList;
+  document.querySelectorAll(".sv-rx button").forEach(b => b.onclick = () => svLike(b.textContent, b));
+  $("svReply").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); svSendReply(); } });
+  $("hClear").onclick = hmOpen; $("hmX").onclick = () => { $("hm").hidden = true; };
+  $("hm").onclick = e => { if (e.target.id === "hm") $("hm").hidden = true; };
+  // keep the newest message in view when the list changes size (stories bar, keyboard, pinned bar)
+  if (window.ResizeObserver) new ResizeObserver(() => { if (pinned) { const b = $("msgs"); b.scrollTop = b.scrollHeight; } }).observe($("msgs"));
+  // extra settings: animated stickers, living background
+  TG.anim = localStorage.getItem("tgAnim") !== "0"; $("tAnim").checked = TG.anim;
+  $("tAnim").onchange = e => { TG.anim = e.target.checked; localStorage.setItem("tgAnim", TG.anim ? "1" : "0"); toast(TG.anim ? "Animated stickers on" : "Stickers stay still (lighter on old phones)"); };
+  const bgOn = () => localStorage.getItem("tgBg") !== "0";
+  $("tBg").checked = bgOn(); $("chat").classList.toggle("nobg", !bgOn());
+  $("tBg").onchange = e => { localStorage.setItem("tgBg", e.target.checked ? "1" : "0"); $("chat").classList.toggle("nobg", !e.target.checked); };
+  // a click right after a long-press or swipe must not close the menu that just opened
+  addEventListener("click", e => { if (Date.now() - (TG.lpAt || 0) < 650 && !e.target.closest("#mm")) { e.stopPropagation(); e.preventDefault(); } }, true);
+  addEventListener("keydown", e => {
+    if (!$("sv").hidden && document.activeElement !== $("svReply")) {
+      if (e.key === "Escape") { svClose(); e.stopImmediatePropagation(); } else if (e.key === "ArrowRight") svNext(); else if (e.key === "ArrowLeft") svPrev(); else if (e.key === " ") { ST.paused = !ST.paused; e.preventDefault(); }
+      return;
+    }
+    if (e.key !== "Escape") return;
+    if (!$("sv").hidden) { $("svReply").blur(); e.stopImmediatePropagation(); return; }
+    for (const id of ["hm", "sc"]) if (!$(id).hidden) { $(id).hidden = true; e.stopImmediatePropagation(); return; }
+  }, true);
 })();
 </script>
 </body>
