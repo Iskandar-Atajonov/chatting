@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <title>Quanta | Quantum physics, explained</title>
 <link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#05060f;--ink:#e8ecff;--muted:#8f98c4;--butter:#7cf0ff;--green:#a78bfa;--line:rgba(255,255,255,.1)}
 *{box-sizing:border-box}
@@ -447,49 +447,303 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
   #send .ib{width:36px}
 }
 </style>
+<style id="land">
+/* ===== v22 landing redesign ===== */
+:root{--ink:#eef1ff;--muted:#929bc8;--c1:#7cf0ff;--c2:#a78bfa;--c3:#ff9ecf;--line:rgba(255,255,255,.09);--serif:"Instrument Serif",Georgia,serif;--mono:"JetBrains Mono",ui-monospace,monospace;--disp:"Space Grotesk",system-ui,sans-serif}
+html{scroll-padding-top:96px}
+body{background:#04050d}
+::selection{background:rgba(124,240,255,.3);color:#fff}
+.veil{background:radial-gradient(ellipse 70% 60% at 68% 38%,transparent 0,rgba(4,5,13,.35) 50%,rgba(4,5,13,.82) 100%)}
+.grain{position:fixed;inset:-50%;z-index:0;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:grain 8s steps(6) infinite}
+@keyframes grain{0%,100%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,2%)}}
+.cglow{position:fixed;left:-320px;top:-320px;width:640px;height:640px;border-radius:50%;pointer-events:none;z-index:0;background:radial-gradient(circle,rgba(124,240,255,.075),rgba(167,139,250,.03) 35%,transparent 62%);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.prog{position:fixed;top:0;left:0;right:0;height:2px;z-index:40;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--c1),var(--c2),var(--c3))}
+body.chatting .prog,body.chatting .grain,body.chatting .cglow{display:none}
+.w2{width:min(1200px,calc(100% - 48px));margin:0 auto}
+/* nav */
+header.nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);width:min(1180px,calc(100% - 28px));z-index:20;background:rgba(8,10,26,.32);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid rgba(255,255,255,.08);border-radius:999px;transition:background .35s,box-shadow .35s,top .35s}
+header.nav.sc{top:10px;background:rgba(8,10,26,.74);box-shadow:0 20px 50px -22px rgba(0,0,0,.85)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:7px 7px 7px 18px}
+.brand2{display:flex;align-items:center;gap:11px;font-family:var(--disp);font-weight:700;letter-spacing:.24em;font-size:.92rem;text-decoration:none}
+.nav-l{display:flex;gap:2px}
+header.nav .nav-l a{margin:0;padding:9px 15px;border-radius:999px;font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s,background .2s}
+header.nav .nav-l a:hover{color:var(--ink);background:rgba(255,255,255,.06)}
+.nav-cta{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;font-size:.84rem;font-weight:600;text-decoration:none;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);transition:background .25s,color .25s,border-color .25s}
+.nav-cta:hover{background:linear-gradient(120deg,var(--c1),var(--c2));color:#060a1f;border-color:transparent}
+.nav-cta svg,.b1 svg{transition:transform .25s}
+.nav-cta:hover svg,.b1:hover svg{transform:translateX(3px)}
+/* buttons */
+.b1{position:relative;display:inline-flex;align-items:center;gap:10px;padding:15px 26px;border-radius:999px;font-weight:600;text-decoration:none;color:#060a1f;background:linear-gradient(120deg,var(--c1),#9cc6ff 50%,var(--c2));box-shadow:0 16px 40px -14px rgba(124,240,255,.7),inset 0 1px 0 rgba(255,255,255,.5);transition:transform .25s,box-shadow .25s;overflow:hidden;isolation:isolate}
+.b1::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.6) 50%,transparent 70%);transform:translateX(-120%);transition:transform .8s}
+.b1:hover{transform:translateY(-2px);box-shadow:0 22px 50px -14px rgba(124,240,255,.85)}
+.b1:hover::after{transform:translateX(120%)}
+.b2{display:inline-flex;align-items:center;gap:11px;padding:15px 24px;border-radius:999px;text-decoration:none;color:var(--ink);border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);backdrop-filter:blur(8px);transition:border-color .2s,background .2s}
+.b2:hover{border-color:rgba(124,240,255,.55);background:rgba(124,240,255,.06)}
+.b2 .dot{width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 12px var(--c1);animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3}}
+.b3{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:var(--ink);border-radius:999px;padding:9px 18px;font:inherit;font-size:.84rem;cursor:pointer;transition:border-color .2s,background .2s}
+.b3:hover{border-color:rgba(124,240,255,.5);background:rgba(124,240,255,.06)}
+/* hero */
+.hx{position:relative;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:140px 0 130px}
+.hx-meta{display:flex;gap:14px;align-items:center;font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:30px}
+.hx-meta b{color:var(--c1);font-weight:500}
+.hx-meta i{width:44px;height:1px;background:linear-gradient(90deg,var(--c1),transparent)}
+.hx-h{font-family:var(--disp);font-weight:600;font-size:clamp(3.3rem,10.2vw,9.6rem);line-height:.9;letter-spacing:-.058em;margin:0;max-width:11ch}
+.hx-h .ln{display:block}
+.sup{position:relative;display:inline-block;font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.025em;padding:0 .1em .06em 0;cursor:crosshair}
+.sup .g{position:relative;z-index:1;background:linear-gradient(100deg,#fff 0%,var(--c1) 38%,var(--c2) 72%,var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sup::before,.sup::after{content:attr(data-t);position:absolute;left:0;top:0;pointer-events:none;color:var(--c1);opacity:.3;filter:blur(1.5px);animation:gh1 3.4s ease-in-out infinite;transition:opacity .5s}
+.sup::after{color:var(--c3);opacity:.22;animation-name:gh2}
+@keyframes gh1{0%,100%{transform:translate(-.05em,.02em)}50%{transform:translate(.07em,-.03em)}}
+@keyframes gh2{0%,100%{transform:translate(.05em,-.02em)}50%{transform:translate(-.07em,.04em)}}
+.sup:hover::before,.sup:hover::after{opacity:0}
+.hx-row{display:flex;flex-direction:column;gap:30px;margin-top:38px;max-width:560px}
+.hx-p{color:#b6bee8;font-size:1.13rem;line-height:1.65;margin:0}
+.hx-cta{display:flex;gap:12px;flex-wrap:wrap}
+.hx-foot{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.scroll{display:flex;align-items:center;gap:12px;text-decoration:none}
+.scroll i{position:relative;width:1px;height:38px;background:rgba(255,255,255,.15);overflow:hidden}
+.scroll i::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--c1);animation:drop 1.8s ease-in-out infinite}
+@keyframes drop{to{top:100%}}
+/* qubit card */
+.qcard{position:absolute;right:max(24px,calc((100% - 1200px) / 2));bottom:118px;width:310px;padding:18px 18px 14px;border-radius:24px;background:linear-gradient(160deg,rgba(22,28,66,.7),rgba(9,12,32,.62));backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%);border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 80px -30px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.07);font-family:var(--mono);font-size:.74rem;color:var(--muted);transition:border-color .3s,box-shadow .3s,opacity .8s,transform .8s}
+.qcard.col{border-color:rgba(124,240,255,.55);box-shadow:0 0 0 4px rgba(124,240,255,.08),0 30px 80px -30px rgba(124,240,255,.45)}
+.qc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;letter-spacing:.12em;text-transform:uppercase;font-size:.64rem}
+.qc-top b{display:flex;align-items:center;gap:7px;color:var(--c1);font-weight:500;letter-spacing:.04em;text-transform:none;font-size:.72rem}
+.qc-top b::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor;animation:blink 1.4s infinite}
+.qcard.col .qc-top b{color:var(--c3)}
+.qc-eq{font-family:var(--serif);font-size:1.5rem;color:var(--ink);margin-bottom:12px;white-space:nowrap}
+.qc-eq b{font-family:var(--mono);font-size:.72em;font-weight:500;color:var(--c1);font-variant-numeric:tabular-nums}
+.qcard.col .qc-eq{animation:snap .45s cubic-bezier(.2,1.4,.4,1)}
+@keyframes snap{30%{transform:scale(1.06);filter:brightness(1.4)}}
+.qc-bar{display:grid;grid-template-columns:26px 1fr 38px;align-items:center;gap:10px;margin:7px 0}
+.qc-bar i{height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.qc-bar i b{display:block;height:100%;width:50%;border-radius:3px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .15s linear}
+.qc-bar em{font-style:normal;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.qc-act{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px}
+#qMeasure{border:0;border-radius:999px;padding:9px 18px;font:600 .8rem Inter,sans-serif;color:#060a1f;background:linear-gradient(120deg,var(--c1),var(--c2));cursor:pointer;box-shadow:0 8px 22px -8px rgba(124,240,255,.7);transition:transform .15s}
+#qMeasure:hover{transform:translateY(-1px)}#qMeasure:active{transform:scale(.95)}
+.qc-log{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:150px}
+.qc-log span{width:17px;height:17px;border-radius:5px;display:grid;place-items:center;font-size:.6rem;font-weight:600;color:#060a1f;background:var(--c1);animation:pop .3s cubic-bezier(.2,1.4,.4,1)}
+.qc-log span.one{background:var(--c2)}
+.qc-hint{margin:10px 0 0;font-size:.66rem;opacity:.75}
+/* marquee */
+.mq{position:relative;z-index:1;overflow:hidden;border-block:1px solid var(--line);padding:24px 0;background:rgba(4,5,13,.55);backdrop-filter:blur(6px);-webkit-mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.mq-t{display:flex;align-items:center;width:max-content;animation:mq 42s linear infinite}
+.mq:hover .mq-t{animation-play-state:paused}
+.mq-t span{font-family:var(--disp);font-weight:600;font-size:clamp(1.8rem,4.2vw,3.4rem);letter-spacing:-.035em;padding:0 30px;white-space:nowrap;line-height:1.1}
+.mq-t span:nth-child(4n+1){color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.38)}
+.mq-t span:nth-child(4n+3){font-family:var(--serif);font-style:italic;font-weight:400;color:var(--c1);letter-spacing:-.01em}
+.mq-t i{font-style:normal;color:var(--c2);font-size:1.1rem}
+@keyframes mq{to{transform:translateX(-50%)}}
+/* sections */
+.sec{position:relative;padding:140px 0}
+.kick{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c1)}
+.kick::before{content:"";width:28px;height:1px;background:currentColor}
+.sec h2,.end h2{font-family:var(--disp);font-weight:600;font-size:clamp(2.5rem,6vw,4.9rem);line-height:.98;letter-spacing:-.048em;margin:18px 0 0}
+.sec h2 em,.end h2 em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.015em;padding-right:.06em;background:linear-gradient(100deg,var(--c1),var(--c2) 70%,var(--c3));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sec-hd{display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:end;margin-bottom:60px}
+.sec-hd p{color:var(--muted);margin:0;max-width:46ch;font-size:1.02rem;line-height:1.7}
+/* idea cards */
+.bento{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.ic:nth-child(1),.ic:nth-child(4){grid-column:span 3}
+.ic:nth-child(2),.ic:nth-child(3){grid-column:span 2}
+.ic{--mx:50%;--my:-20%;position:relative;overflow:hidden;border-radius:28px;background:linear-gradient(180deg,rgba(18,23,58,.62),rgba(8,11,30,.6));border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:opacity .8s,transform .5s cubic-bezier(.2,.8,.2,1),border-color .3s,box-shadow .4s}
+.ic::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(420px circle at var(--mx) var(--my),rgba(124,240,255,.13),transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
+.ic:hover{transform:translateY(-6px);border-color:rgba(124,240,255,.3);box-shadow:0 30px 70px -35px rgba(124,240,255,.35)}
+.ic:hover::before{opacity:1}
+.ic canvas{display:block;width:100%;height:230px}
+.ic-b{position:relative;padding:4px 28px 28px}
+.ic-n{font-family:var(--mono);font-size:.68rem;color:var(--c1);letter-spacing:.14em}
+.ic h3{font-family:var(--disp);font-size:1.65rem;letter-spacing:-.035em;margin:8px 0 8px;font-weight:600}
+.ic p{margin:0;color:var(--muted);font-size:.96rem;line-height:1.65;max-width:48ch}
+/* lab */
+.lab-box{position:relative;border-radius:32px;overflow:hidden;border:1px solid rgba(255,255,255,.09);background:radial-gradient(900px 340px at 30% -10%,rgba(124,240,255,.07),transparent 70%),linear-gradient(180deg,rgba(12,16,42,.88),rgba(6,8,22,.92));box-shadow:0 50px 110px -45px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.05)}
+#slit{display:block;width:100%;height:clamp(320px,40vw,480px)}
+.lab-ui{display:flex;align-items:center;gap:26px;flex-wrap:wrap;padding:16px 24px;border-top:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.02)}
+.lab-stat{display:flex;align-items:baseline;gap:8px}
+.lab-stat b{font-family:var(--mono);font-size:1.5rem;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums;min-width:3ch}
+.lab-stat span{font-size:.8rem;color:var(--muted)}
+.tog{position:relative;display:flex;align-items:center;gap:12px;cursor:pointer;font-size:.9rem}
+.tog input{position:absolute;opacity:0;width:1px;height:1px}
+.tog i{position:relative;width:44px;height:25px;border-radius:999px;background:rgba(255,255,255,.12);transition:background .25s;flex:none}
+.tog i::after{content:"";position:absolute;top:3px;left:3px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .25s cubic-bezier(.2,1.2,.4,1)}
+.tog input:checked+i{background:linear-gradient(120deg,var(--c3),var(--c2))}
+.tog input:checked+i::after{transform:translateX(19px)}
+.tog input:focus-visible+i{outline:2px solid var(--c1);outline-offset:2px}
+.rng{display:flex;align-items:center;gap:10px;font-size:.84rem;color:var(--muted)}
+.rng input{accent-color:var(--c1);width:120px}
+.lab-leg{margin-left:auto;font-family:var(--mono);font-size:.72rem;color:var(--muted)}
+/* numbers */
+.nums{border-top:1px solid var(--line)}
+.num{display:grid;grid-template-columns:120px 1fr minmax(0,280px);align-items:center;gap:30px;padding:36px 12px;border-bottom:1px solid var(--line);transition:background .4s,opacity .8s,transform .8s}
+.num:hover{background:linear-gradient(90deg,rgba(124,240,255,.05),transparent 70%)}
+.num-s{font-family:var(--serif);font-style:italic;font-size:4.8rem;line-height:.9;color:var(--c1);text-shadow:0 0 40px rgba(124,240,255,.35)}
+.num-v{font-family:var(--disp);font-weight:500;font-size:clamp(2.1rem,5.4vw,4.5rem);letter-spacing:-.045em;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.num-v sup{font-size:.42em;vertical-align:.95em;letter-spacing:-.02em;margin-left:.04em}
+.hx-foot sup{font-size:.85em;vertical-align:.5em}
+.num-v small{font-size:.34em;color:var(--muted);letter-spacing:0;margin-left:.5em;font-family:var(--mono)}
+.num p{margin:0;color:var(--muted);font-size:.95rem;text-align:right}
+/* history */
+.hist .w2{display:grid;grid-template-columns:1fr 1.2fr;gap:80px}
+.hist-l .hstk{position:sticky;top:140px}
+.hist-l p{color:var(--muted);max-width:38ch;margin:24px 0 0;line-height:1.7}
+.hist-r{list-style:none;margin:0;padding:0 0 0 40px;position:relative}
+.hist-r::before{content:"";position:absolute;left:0;top:12px;bottom:60px;width:1px;background:rgba(255,255,255,.1)}
+.hist-r::after{content:"";position:absolute;left:0;top:12px;width:1px;height:calc((100% - 72px) * var(--p,0));background:linear-gradient(var(--c1),var(--c2));box-shadow:0 0 14px var(--c1)}
+.hist-r li{position:relative;padding:0 0 64px}
+.hist-r li::before{content:"";position:absolute;left:-46px;top:12px;width:13px;height:13px;border-radius:50%;background:#0a0e28;border:1px solid rgba(255,255,255,.3);transition:background .4s,border-color .4s,box-shadow .4s;z-index:1}
+.hist-r li.on::before{background:var(--c1);border-color:var(--c1);box-shadow:0 0 0 6px rgba(124,240,255,.14),0 0 20px var(--c1)}
+.yr{display:block;font-family:var(--serif);font-style:italic;font-size:clamp(3rem,6vw,4.8rem);line-height:.95;color:rgba(255,255,255,.16);transition:color .5s}
+.hist-r li.on .yr{color:var(--ink)}
+.hist-r h3{font-family:var(--disp);font-size:1.4rem;font-weight:600;letter-spacing:-.025em;margin:12px 0 6px}
+.hist-r p{margin:0;color:var(--muted);max-width:46ch;line-height:1.65}
+/* closing */
+.end{position:relative;z-index:1;text-align:center;padding:150px 0 160px}
+.end h2{font-size:clamp(2.8rem,8.4vw,7.4rem);margin:24px auto 44px;max-width:13ch;line-height:.95}
+/* footer */
+footer.ft{position:relative;z-index:1;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(4,5,13,.3),#04050d 45%);padding:0 0 28px;overflow:hidden;backdrop-filter:none;color:var(--muted)}
+.ft-word{font-family:var(--disp);font-weight:700;font-size:clamp(5rem,23vw,21rem);letter-spacing:-.07em;line-height:.78;text-align:center;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(124,240,255,.2),rgba(167,139,250,.06) 55%,transparent 80%);-webkit-background-clip:text;background-clip:text;padding-top:70px;user-select:none;white-space:nowrap}
+.ft-row{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-top:34px;font-family:var(--mono);font-size:.76rem}
+.ft-links{display:flex;gap:20px;flex-wrap:wrap}
+.ft-links a{text-decoration:none;transition:color .2s}
+.ft-links a:hover{color:var(--c1)}
+footer.ft #gate input{font-family:var(--mono)}
+/* responsive */
+@media(max-width:1060px){
+  .qcard{position:relative;right:auto;bottom:auto;margin:48px 24px 0;width:auto;max-width:360px}
+  .hx{justify-content:flex-start;padding-bottom:110px}
+  .sec-hd{grid-template-columns:1fr;gap:20px}
+  .hist .w2{grid-template-columns:1fr;gap:48px}
+  .hist-l .hstk{position:static}
+}
+@media(max-width:760px){
+  header.nav .nav-l{display:none}
+  .nav-in{padding-left:16px}
+  .w2{width:calc(100% - 36px)}
+  .hx{padding-top:120px}
+  .hx-h{font-size:clamp(3rem,15.5vw,5rem)}
+  .qcard{margin:40px 18px 0;max-width:none}
+  .hx-foot .eq{display:none}
+  .hx-meta{gap:10px;font-size:.64rem;letter-spacing:.12em}
+  .hx-meta b{white-space:nowrap}
+  .hx-meta i{display:none}
+  .sec{padding:96px 0}
+  .bento{grid-template-columns:1fr}
+  .ic:nth-child(n){grid-column:auto}
+  .ic canvas{height:200px}
+  .ic-b{padding:2px 22px 24px}
+  .num{grid-template-columns:52px 1fr;gap:6px 16px;padding:26px 4px}
+  .num-s{font-size:2.9rem}
+  .num p{grid-column:2;text-align:left}
+  .num-v{white-space:normal}
+  .lab-box{border-radius:24px}
+  #slit{height:340px}
+  .lab-ui{gap:16px;padding:14px 16px}
+  .lab-leg{margin-left:0;width:100%}
+  .end{padding:110px 0 120px}
+  .ft-row{flex-direction:column;align-items:flex-start}
+}
+</style>
 </head>
 <body>
 <canvas id="bg" aria-hidden="true"></canvas><div class="veil"></div>
-<header><div class="wrap"><div class="logo"><i></i>QUANTA</div><nav><a href="#ideas">Ideas</a><a href="#numbers">Numbers</a><a href="#history">History</a></nav></div></header>
-<main class="wrap">
-  <div class="hero">
-    <span class="tag">Quantum physics, explained</span>
-    <h1>Reality is a probability.</h1>
-    <p>At the smallest scales, particles behave like waves, share states across distance and refuse to be pinned down. Explore the ideas that rewrote physics.</p>
-    <div class="btns"><a class="btn p" href="#ideas">Explore the ideas</a><a class="btn g" href="#history">See the timeline</a></div>
-  </div>
-  <section id="ideas">
-    <span class="eyebrow">Core ideas</span><h2>Four ideas that break intuition</h2>
-    <div class="grid">
-      <div class="card rv"><b>01</b><h3>Superposition</h3><p>A system can exist as a blend of several states at once, until a measurement picks one.</p></div>
-      <div class="card rv"><b>02</b><h3>Entanglement</h3><p>Two particles can share a single state, so measuring one is correlated with the other at any distance.</p></div>
-      <div class="card rv"><b>03</b><h3>Wave-particle duality</h3><p>Light and matter produce interference patterns like waves, yet land as single points like particles.</p></div>
-      <div class="card rv"><b>04</b><h3>Uncertainty</h3><p>Position and momentum cannot both be known exactly. The limit is Δx·Δp ≥ ħ/2.</p></div>
+<div class="prog" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div><div class="cglow" aria-hidden="true"></div>
+<header class="nav"><div class="nav-in">
+  <a class="brand2" href="#top0"><i class="qlogo" aria-hidden="true"></i>QUANTA</a>
+  <nav class="nav-l"><a href="#ideas">Ideas</a><a href="#lab">Experiment</a><a href="#numbers">Numbers</a><a href="#history">History</a></nav>
+  <a class="nav-cta" href="#lab">Try the lab <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+</div></header>
+<main class="lp">
+  <section class="hx" id="top0">
+    <div class="w2">
+      <div class="hx-meta rv"><b>N° 01</b><i></i><span>A field guide to the quantum world</span></div>
+      <h1 class="hx-h rv"><span class="ln">Reality is a</span><span class="ln"><em class="sup" data-t="probability."><span class="g">probability.</span></em></span></h1>
+      <div class="hx-row rv">
+        <p class="hx-p">At the smallest scales, particles behave like waves, share states across distance and refuse to be pinned down. Explore the ideas that rewrote physics, then run the experiment yourself.</p>
+        <div class="hx-cta"><a class="b1" href="#ideas">Explore the ideas <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="b2" href="#lab"><span class="dot"></span>Run the double-slit</a></div>
+      </div>
+    </div>
+    <aside class="qcard rv" id="qcard" aria-label="Interactive qubit">
+      <div class="qc-top"><span>Qubit · live</span><b id="qcState">superposed</b></div>
+      <div class="qc-eq">|ψ⟩ = <b id="qa">0.71</b>|0⟩ + <b id="qb">0.71</b>|1⟩</div>
+      <div class="qc-bar"><span>|0⟩</span><i><b id="q0"></b></i><em id="q0p">50%</em></div>
+      <div class="qc-bar"><span>|1⟩</span><i><b id="q1"></b></i><em id="q1p">50%</em></div>
+      <div class="qc-act"><button type="button" id="qMeasure">Measure</button><div class="qc-log" id="qLog" aria-label="Past results"></div></div>
+      <p class="qc-hint">Each measurement collapses the state to 0 or 1.</p>
+    </aside>
+    <div class="hx-foot w2"><a class="scroll" href="#ideas"><i></i>Scroll to explore</a><span class="eq">ħ = 1.054 571 817 × 10<sup>−34</sup> J·s</span></div>
+  </section>
+
+  <div class="mq" aria-hidden="true"><div class="mq-t">
+    <span>Superposition</span><i>✦</i><span>Entanglement</span><i>✦</i><span>Tunnelling</span><i>✦</i><span>Decoherence</span><i>✦</i><span>Wave–particle duality</span><i>✦</i><span>Uncertainty</span><i>✦</i>
+    <span>Superposition</span><i>✦</i><span>Entanglement</span><i>✦</i><span>Tunnelling</span><i>✦</i><span>Decoherence</span><i>✦</i><span>Wave–particle duality</span><i>✦</i><span>Uncertainty</span><i>✦</i>
+  </div></div>
+
+  <section class="sec" id="ideas">
+    <div class="w2">
+      <div class="sec-hd rv"><div><span class="kick">01 — Core ideas</span><h2>Four ideas that <em>break</em> intuition</h2></div><p>Everyday objects have one place, one speed and one story. Quantum objects don't. Each of these ideas has been tested again and again, and it has always held.</p></div>
+      <div class="bento">
+        <article class="ic rv" data-viz="sup"><canvas aria-hidden="true"></canvas><div class="ic-b"><span class="ic-n">01 / SUPERPOSITION</span><h3>Many states at once</h3><p>A system can exist as a blend of several states at once, until a measurement picks one.</p></div></article>
+        <article class="ic rv" data-viz="ent" style="transition-delay:.08s"><canvas aria-hidden="true"></canvas><div class="ic-b"><span class="ic-n">02 / ENTANGLEMENT</span><h3>Linked at any distance</h3><p>Two particles can share a single state, so measuring one is correlated with the other at any distance.</p></div></article>
+        <article class="ic rv" data-viz="wave"><canvas aria-hidden="true"></canvas><div class="ic-b"><span class="ic-n">03 / WAVE–PARTICLE DUALITY</span><h3>Waves that land as dots</h3><p>Light and matter produce interference patterns like waves, yet land as single points like particles.</p></div></article>
+        <article class="ic rv" data-viz="unc" style="transition-delay:.08s"><canvas aria-hidden="true"></canvas><div class="ic-b"><span class="ic-n">04 / UNCERTAINTY</span><h3>Pin one, lose the other</h3><p>Position and momentum cannot both be known exactly. The limit is Δx·Δp ≥ ħ/2. Squeeze one and the other spreads.</p></div></article>
+      </div>
     </div>
   </section>
-  <section id="numbers">
-    <span class="eyebrow">Constants</span><h2>The numbers behind it</h2>
-    <div class="stats">
-      <div class="stat rv"><h3>6.626 × 10⁻³⁴ J·s</h3><p>Planck's constant h, the scale of the quantum world.</p></div>
-      <div class="stat rv"><h3>299,792,458 m/s</h3><p>The speed of light in vacuum, exact by definition.</p></div>
-      <div class="stat rv"><h3>1.055 × 10⁻³⁴ J·s</h3><p>The reduced Planck constant ħ = h / 2π.</p></div>
+
+  <section class="sec" id="lab">
+    <div class="w2">
+      <div class="sec-hd rv"><div><span class="kick">02 — Experiment</span><h2>The double-slit, <em>live</em></h2></div><p>Particles are fired one at a time. Each one lands as a single dot, but together they paint stripes, as if every particle went through both slits. Turn on the detector to see which slit each one uses, and the stripes disappear.</p></div>
+      <div class="lab-box rv">
+        <canvas id="slit" aria-label="Double-slit simulation"></canvas>
+        <div class="lab-ui">
+          <div class="lab-stat"><b id="slN">0</b><span>particles</span></div>
+          <label class="tog"><input type="checkbox" id="slObs"><i></i><span>Which-slit detector</span></label>
+          <label class="rng"><span>Rate</span><input type="range" id="slRate" min="2" max="80" value="26"></label>
+          <button type="button" id="slReset" class="b3">Reset</button>
+          <span class="lab-leg" id="labMode">Detector off: waves interfere, many stripes</span>
+        </div>
+      </div>
     </div>
   </section>
-  <section id="history">
-    <span class="eyebrow">History</span><h2>From a hack to a theory</h2>
-    <div class="tl">
-      <div class="rv"><b>1900</b><p>Max Planck proposes that energy is exchanged in discrete quanta.</p></div>
-      <div class="rv"><b>1905</b><p>Einstein explains the photoelectric effect with quanta of light.</p></div>
-      <div class="rv"><b>1925 to 1927</b><p>Heisenberg and Schrödinger formulate quantum mechanics; Heisenberg states the uncertainty principle.</p></div>
-      <div class="rv"><b>1964</b><p>John Bell shows entanglement can be tested against local hidden variables.</p></div>
-      <div class="rv"><b>2022</b><p>Aspect, Clauser and Zeilinger win the Nobel Prize for their entanglement experiments.</p></div>
+
+  <section class="sec" id="numbers">
+    <div class="w2">
+      <div class="sec-hd rv"><div><span class="kick">03 — Constants</span><h2>The numbers <em>behind</em> it</h2></div><p>Three constants set the scale of the quantum world and how fast anything can move through it.</p></div>
+      <div class="nums">
+        <div class="num rv"><span class="num-s">h</span><div class="num-v"><span class="sv">6.626 × 10<sup>−34</sup></span><small>J·s</small></div><p>Planck's constant, the scale of the quantum world.</p></div>
+        <div class="num rv"><span class="num-s">c</span><div class="num-v"><span class="sv">299 792 458</span><small>m/s</small></div><p>The speed of light in vacuum, exact by definition.</p></div>
+        <div class="num rv"><span class="num-s">ħ</span><div class="num-v"><span class="sv">1.055 × 10<sup>−34</sup></span><small>J·s</small></div><p>The reduced Planck constant, ħ = h / 2π.</p></div>
+      </div>
     </div>
+  </section>
+
+  <section class="sec hist" id="history">
+    <div class="w2">
+      <div class="hist-l"><div class="hstk rv"><span class="kick">04 — History</span><h2>From a <em>hack</em> to a theory</h2><p>It started as a mathematical trick to fix one formula. Within thirty years it had become the most precisely tested theory in science.</p></div></div>
+      <ol class="hist-r">
+        <li class="rv"><span class="yr">1900</span><h3>Energy comes in packets</h3><p>Max Planck proposes that energy is exchanged in discrete quanta.</p></li>
+        <li class="rv"><span class="yr">1905</span><h3>Light is made of quanta</h3><p>Einstein explains the photoelectric effect with quanta of light.</p></li>
+        <li class="rv"><span class="yr">1925–27</span><h3>A new mechanics</h3><p>Heisenberg and Schrödinger formulate quantum mechanics; Heisenberg states the uncertainty principle.</p></li>
+        <li class="rv"><span class="yr">1964</span><h3>A test for reality</h3><p>John Bell shows entanglement can be tested against local hidden variables.</p></li>
+        <li class="rv"><span class="yr">2022</span><h3>A Nobel for entanglement</h3><p>Aspect, Clauser and Zeilinger win the Nobel Prize for their entanglement experiments.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="end rv">
+    <div class="w2"><span class="kick">Measurement changes everything</span><h2>Nothing is <em>decided</em> until you look.</h2><a class="b1" href="#top0">Back to the top <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></a></div>
   </section>
 </main>
-<footer><div class="wrap foot">
-  <span>&copy; 2026 Quanta · v21</span>
-  <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
-</div></footer>
+<footer class="ft">
+  <div class="ft-word" aria-hidden="true">QUANTA</div>
+  <div class="w2 ft-row">
+    <span>&copy; 2026 Quanta · v22</span>
+    <span class="ft-links"><a href="#ideas">Ideas</a><a href="#lab">Experiment</a><a href="#numbers">Numbers</a><a href="#history">History</a></span>
+    <form id="gate" autocomplete="off" onsubmit="return false"><input id="pw" type="password" placeholder="Password" aria-label="Password"><button>Go</button></form>
+  </div>
+</footer>
 
 <div id="chat" aria-hidden="true">
   <div id="top"><div class="tl1"><b class="brand"><i class="qlogo" aria-hidden="true"></i><span>Quanta</span></b><span id="st">connecting…</span><button id="pb" type="button">0 online</button></div><div class="tr1"><button id="cl" type="button" hidden>🧹 Clean media</button><button id="rf" type="button" hidden>↻ Refresh all</button><div id="meav" class="av" role="button" tabindex="0" title="Click to change your profile photo (Shift+click removes it)"></div><input id="pf" type="file" accept="image/*" hidden><input id="nm" maxlength="24" placeholder="Your name" aria-label="Your name"><button id="close">Close</button></div></div>
@@ -560,6 +814,235 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
     document.addEventListener("visibilitychange", () => { if (!document.hidden && window.__bgOn && !running) { running = true; requestAnimationFrame(tick); } });
     requestAnimationFrame(tick);
   } catch (e) { console.warn("3D background unavailable", e); }
+})();
+</script>
+<script>
+// ===== v22 landing interactions: nav, qubit card, idea visuals, double-slit lab =====
+(function(){
+  const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const away = () => document.body.classList.contains("chatting") || document.hidden;
+  const Q = s => document.querySelector(s), QA = s => [...document.querySelectorAll(s)];
+  const C1 = "124,240,255", C2 = "167,139,250", C3 = "255,158,207";
+  const rgba = (c, a) => "rgba(" + c + "," + a + ")";
+
+  // nav state, page progress, history line
+  const nav = Q("header.nav"), prog = Q(".prog"), hr = Q(".hist-r"), lis = QA(".hist-r li");
+  function onScroll() {
+    nav.classList.toggle("sc", scrollY > 24);
+    const h = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = "scaleX(" + (h > 0 ? Math.min(1, scrollY / h) : 0) + ")";
+    if (hr) {
+      const r = hr.getBoundingClientRect(), mid = innerHeight * .62;
+      hr.style.setProperty("--p", Math.max(0, Math.min(1, (mid - r.top) / r.height)).toFixed(4));
+      lis.forEach(li => li.classList.toggle("on", li.getBoundingClientRect().top + 30 < mid));
+    }
+  }
+  addEventListener("scroll", onScroll, { passive: true }); addEventListener("resize", onScroll); onScroll();
+
+  // soft light that follows the cursor, and a spotlight on idea cards
+  const glow = Q(".cglow");
+  if (glow && matchMedia("(pointer:fine)").matches && !RM) addEventListener("pointermove", e => { glow.style.transform = "translate(" + e.clientX + "px," + e.clientY + "px)"; }, { passive: true });
+  else if (glow) glow.remove();
+  QA(".ic").forEach(c => c.addEventListener("pointermove", e => { const r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px"); }));
+
+  // qubit card: the state drifts; "Measure" collapses it to 0 or 1 with the right odds
+  const qc = Q("#qcard"), qs = Q("#qcState"), qlog = Q("#qLog");
+  let th = 1.1, col = null, qf = 0;
+  function qDraw() {
+    const p0 = col === null ? Math.cos(th / 2) ** 2 : col ? 0 : 1;
+    Q("#qa").textContent = Math.sqrt(p0).toFixed(2); Q("#qb").textContent = Math.sqrt(1 - p0).toFixed(2);
+    Q("#q0").style.width = (p0 * 100).toFixed(1) + "%"; Q("#q1").style.width = ((1 - p0) * 100).toFixed(1) + "%";
+    Q("#q0p").textContent = Math.round(p0 * 100) + "%"; Q("#q1p").textContent = Math.round((1 - p0) * 100) + "%";
+  }
+  Q("#qMeasure").onclick = () => {
+    if (col !== null) return;
+    col = Math.random() < Math.cos(th / 2) ** 2 ? 0 : 1;
+    qc.classList.add("col"); qs.textContent = "collapsed → |" + col + "⟩"; qDraw();
+    const s = document.createElement("span"); s.textContent = col; if (col) s.className = "one"; qlog.prepend(s);
+    while (qlog.children.length > 14) qlog.lastChild.remove();
+    setTimeout(() => { col = null; th = Math.random() * Math.PI * 2; qc.classList.remove("col"); qs.textContent = "superposed"; qDraw(); }, 1500);
+  };
+
+  // canvas helpers
+  const fit = c => {
+    const d = Math.min(devicePixelRatio || 1, 2), w = c.clientWidth, h = c.clientHeight;
+    if (c.width !== Math.round(w * d) || c.height !== Math.round(h * d)) { c.width = Math.round(w * d); c.height = Math.round(h * d); }
+    const x = c.getContext("2d"); x.setTransform(d, 0, 0, d, 0, 0); return [x, w, h];
+  };
+  function glowDot(x, cx, cy, r, c) {
+    const g = x.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, rgba(c, 1)); g.addColorStop(.22, rgba(c, .6)); g.addColorStop(1, rgba(c, 0));
+    x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill();
+  }
+  function arrow(x, x0, y0, x1, y1, col) {
+    x.strokeStyle = col; x.fillStyle = col; x.lineWidth = 2; x.beginPath(); x.moveTo(x0, y0); x.lineTo(x1, y1); x.stroke();
+    const a = Math.atan2(y1 - y0, x1 - x0); x.beginPath(); x.moveTo(x1 + 2 * Math.cos(a), y1 + 2 * Math.sin(a));
+    x.lineTo(x1 - 8 * Math.cos(a - .5), y1 - 8 * Math.sin(a - .5)); x.lineTo(x1 - 8 * Math.cos(a + .5), y1 - 8 * Math.sin(a + .5)); x.closePath(); x.fill();
+  }
+  const mono = px => px + "px 'JetBrains Mono',ui-monospace,monospace";
+
+  // the four idea visuals
+  const DRAW = {
+    sup(x, w, h, t) {
+      const cx = w / 2, cy = h / 2 + 4, r = Math.min(w, h) * .34;
+      x.lineWidth = 1; x.strokeStyle = "rgba(255,255,255,.14)"; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.stroke();
+      x.setLineDash([3, 5]); x.beginPath(); x.ellipse(cx, cy, r, r * .3, 0, 0, 7); x.stroke();
+      x.beginPath(); x.moveTo(cx, cy - r); x.lineTo(cx, cy + r); x.stroke(); x.setLineDash([]);
+      x.font = mono(12); x.fillStyle = "rgba(200,208,255,.6)"; x.textAlign = "center";
+      x.fillText("|0⟩", cx, cy - r - 9); x.fillText("|1⟩", cx, cy + r + 19);
+      for (let k = 13; k >= 0; k--) {
+        const a = 1.15 + Math.sin(t * .7 - k * .05) * .85, ph = t * .9 - k * .085;
+        const sx = cx + r * Math.sin(a) * Math.cos(ph), sy = cy - r * Math.cos(a) * .92 + r * .28 * Math.sin(a) * Math.sin(ph);
+        x.strokeStyle = k ? rgba(C2, .55 * (1 - k / 14)) : rgba(C1, .95); x.lineWidth = k ? 1 : 2;
+        x.beginPath(); x.moveTo(cx, cy); x.lineTo(sx, sy); x.stroke();
+        if (!k) glowDot(x, sx, sy, 16, C1);
+      }
+      glowDot(x, cx, cy, 7, C2);
+    },
+    ent(x, w, h, t) {
+      const y = h / 2, ax = w * .2, bx = w * .8, wv = (u, j) => y + Math.sin(u * Math.PI * 5 - t * 3 + j * .9) * 16 * Math.sin(u * Math.PI);
+      const g = x.createLinearGradient(ax, 0, bx, 0); g.addColorStop(0, rgba(C1, .95)); g.addColorStop(1, rgba(C2, .95));
+      for (let j = 2; j >= 0; j--) {
+        x.strokeStyle = g; x.globalAlpha = j ? .22 : .9; x.lineWidth = j ? 1 : 1.6; x.beginPath();
+        for (let px = ax; px <= bx; px += 3) { const yy = wv((px - ax) / (bx - ax), j); px === ax ? x.moveTo(px, yy) : x.lineTo(px, yy); }
+        x.stroke();
+      }
+      x.globalAlpha = 1;
+      const u = (Math.sin(t * 1.3) + 1) / 2; glowDot(x, ax + u * (bx - ax), wv(u, 0), 11, C3);
+      glowDot(x, ax, y, 32, C1); glowDot(x, bx, y, 32, C2);
+      const s = t * 1.2; arrow(x, ax, y, ax + 28 * Math.cos(s), y + 28 * Math.sin(s), "#fff"); arrow(x, bx, y, bx - 28 * Math.cos(s), y - 28 * Math.sin(s), "#fff");
+      x.font = mono(11); x.fillStyle = "rgba(200,208,255,.55)"; x.textAlign = "center";
+      x.fillText("A", ax, y + 56); x.fillText("B", bx, y + 56); x.fillText("always opposite", w / 2, h - 18);
+    },
+    wave(x, w, h, t, st) {
+      const W = 150, H = Math.max(40, Math.round(150 * h / w));
+      if (st.W !== W || st.H !== H) {
+        st.W = W; st.H = H; st.off = document.createElement("canvas"); st.off.width = W; st.off.height = H;
+        st.img = st.off.getContext("2d").createImageData(W, H); st.d = new Float32Array(W * H * 2);
+        for (let j = 0; j < H; j++) for (let i = 0; i < W; i++) { const o = (j * W + i) * 2; st.d[o] = Math.hypot(i + 2, j - H * .4); st.d[o + 1] = Math.hypot(i + 2, j - H * .6); }
+      }
+      const D = st.img.data, d = st.d, wt = t * 4;
+      for (let p = 0, n = W * H; p < n; p++) {
+        const i = p % W, v = Math.cos(d[p * 2] * .62 - wt) + Math.cos(d[p * 2 + 1] * .62 - wt), I = v * v / 4, m = i / W, q = p * 4;
+        D[q] = 124 + 43 * m; D[q + 1] = 240 - 101 * m; D[q + 2] = 255 - 5 * m; D[q + 3] = I * 215 * Math.min(1, i / 16);
+      }
+      st.off.getContext("2d").putImageData(st.img, 0, 0);
+      x.imageSmoothingEnabled = true; x.drawImage(st.off, 0, 0, w, h);
+      const g1 = h * .4, g2 = h * .6, sw = h * .035;
+      x.fillStyle = "rgba(220,228,255,.35)"; x.fillRect(0, 0, 4, g1 - sw); x.fillRect(0, g1 + sw, 4, g2 - g1 - 2 * sw); x.fillRect(0, g2 + sw, 4, h - g2 - sw);
+    },
+    unc(x, w, h, t) {
+      const cx = w / 2, cy = h * .4, A = h * .24, sg = .055 + .1 * (1 + Math.sin(t * .8)) / 2, x0 = w * .06, x1 = w * .94;
+      x.lineWidth = 1; x.setLineDash([3, 4]); x.strokeStyle = "rgba(255,255,255,.22)";
+      for (const sgn of [1, -1]) { x.beginPath(); for (let px = x0; px <= x1; px += 3) { const u = (px - cx) / w, yy = cy - sgn * A * Math.exp(-u * u / (2 * sg * sg)); px === x0 ? x.moveTo(px, yy) : x.lineTo(px, yy); } x.stroke(); }
+      x.setLineDash([]);
+      const g = x.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, rgba(C1, .15)); g.addColorStop(.5, rgba(C1, 1)); g.addColorStop(1, rgba(C2, .15));
+      x.strokeStyle = g; x.lineWidth = 2; x.beginPath();
+      for (let px = x0; px <= x1; px += 2) { const u = (px - cx) / w, yy = cy - A * Math.exp(-u * u / (2 * sg * sg)) * Math.cos(u * 62 - t * 5); px === x0 ? x.moveTo(px, yy) : x.lineTo(px, yy); }
+      x.stroke();
+      x.font = mono(11); x.textAlign = "left";
+      [["Δx", sg * w * 2.2, C1], ["Δp", .0185 / sg * w, C3]].forEach(([l, L, c], i) => {
+        const yy = h * .78 + i * 22; x.fillStyle = "rgba(200,208,255,.65)"; x.fillText(l, x0, yy + 4);
+        x.fillStyle = "rgba(255,255,255,.07)"; x.fillRect(x0 + 30, yy - 2, w * .45, 5);
+        x.fillStyle = rgba(c, .9); x.fillRect(x0 + 30, yy - 2, Math.min(w * .45, L), 5);
+      });
+    }
+  };
+  const vis = new WeakMap(), vio = new IntersectionObserver(es => es.forEach(e => vis.set(e.target, e.isIntersecting)), { rootMargin: "120px" });
+  const viz = QA(".ic canvas").map(c => { vio.observe(c); return { c, k: c.closest(".ic").dataset.viz, st: {} }; });
+
+  // double-slit lab
+  const sc = Q("#slit"), hitsC = document.createElement("canvas"), lab = { parts: [], hist: new Float32Array(2), n: 0, acc: 0, last: 0, obs: false, flash: [0, 0] };
+  let LW = 0, LH = 0, labVis = false;
+  const geo = () => ({ ex: LW * .07, bx: LW * (LW < 600 ? .33 : .38), sx: LW * (LW < 600 ? .68 : .8), cy: LH / 2, sd: LH * .13, sw: LH * .035 });
+  function labReset() {
+    lab.parts = []; lab.n = 0; lab.acc = 0; lab.hist = new Float32Array(Math.ceil(LH) + 2);
+    const d = Math.min(devicePixelRatio || 1, 2); hitsC.width = Math.round(LW * d); hitsC.height = Math.round(LH * d); hitsC.getContext("2d").setTransform(d, 0, 0, d, 0, 0);
+    Q("#slN").textContent = "0";
+  }
+  const sinc = z => Math.abs(z) < 1e-6 ? 1 : Math.sin(z) / z;
+  const dens = u => lab.obs ? Math.exp(-((u - .28) ** 2) / .03) + Math.exp(-((u + .28) ** 2) / .03) : Math.cos(u * 10) ** 2 * sinc(u * 3.4) ** 2;
+  const sample = () => { for (let i = 0; i < 500; i++) { const u = Math.random() * 2 - 1; if (Math.random() < dens(u)) return u; } return 0; };
+  function land(p, G) {
+    const x = hitsC.getContext("2d"); x.fillStyle = lab.obs ? rgba(C3, .8) : rgba(C1, .8);
+    x.beginPath(); x.arc(G.sx + (Math.random() - .5) * 16, p.y, 1.3, 0, 7); x.fill();
+    for (let d = -12; d <= 12; d++) { const i = Math.round(p.y) + d; if (i >= 0 && i < lab.hist.length) lab.hist[i] += Math.exp(-d * d / 40); }
+    lab.n++; Q("#slN").textContent = lab.n.toLocaleString();
+  }
+  function labFrame(now) {
+    const [x, w, h] = fit(sc); if (w !== LW || h !== LH) { LW = w; LH = h; labReset(); }
+    const G = geo(), dt = lab.last ? Math.min(100, now - lab.last) : 0; lab.last = now;
+    lab.acc += dt * (+Q("#slRate").value) / 1000;
+    while (lab.acc >= 1) { lab.acc--; lab.parts.push({ t0: now - Math.random() * 16, s: Math.random() < .5 ? 0 : 1, y: G.cy + sample() * LH * .44 }); }
+    x.clearRect(0, 0, w, h);
+    x.strokeStyle = "rgba(255,255,255,.05)"; x.lineWidth = 1; x.setLineDash([2, 6]); x.beginPath(); x.moveTo(G.ex, G.cy); x.lineTo(G.bx, G.cy); x.stroke(); x.setLineDash([]);
+    glowDot(x, G.ex, G.cy, 30, C1); x.fillStyle = "#fff"; x.beginPath(); x.arc(G.ex, G.cy, 4, 0, 7); x.fill();
+    if (!lab.obs) for (let k = 0; k < 7; k++) {
+      const r = (now / 1000 * 70 + k * 44) % 300; x.strokeStyle = rgba(C1, .16 * (1 - r / 300)); x.lineWidth = 1;
+      for (const s of [-1, 1]) { x.beginPath(); x.arc(G.bx, G.cy + s * G.sd, r, -Math.PI / 2, Math.PI / 2); x.stroke(); }
+    }
+    const y1 = G.cy - G.sd - G.sw, y2 = G.cy - G.sd + G.sw, y3 = G.cy + G.sd - G.sw, y4 = G.cy + G.sd + G.sw;
+    x.fillStyle = "rgba(220,228,255,.28)"; x.fillRect(G.bx - 3, 0, 6, y1); x.fillRect(G.bx - 3, y2, 6, y3 - y2); x.fillRect(G.bx - 3, y4, 6, h - y4);
+    if (lab.obs) [0, 1].forEach(i => {
+      const yy = i ? G.cy + G.sd : G.cy - G.sd, f = Math.max(0, 1 - (now - lab.flash[i]) / 260);
+      if (f > 0) glowDot(x, G.bx + 16, yy, 24, C3);
+      x.fillStyle = rgba(C3, .35 + .65 * f); x.beginPath(); x.arc(G.bx + 16, yy, 6, 0, 7); x.fill();
+    });
+    x.fillStyle = "rgba(255,255,255,.05)"; x.fillRect(G.sx - 10, 0, 20, h);
+    x.drawImage(hitsC, 0, 0, w, h);
+    let mx = 1; for (let i = 0; i < lab.hist.length; i++) if (lab.hist[i] > mx) mx = lab.hist[i];
+    const h0 = G.sx + 20, hw = w - h0 - 18, gr = x.createLinearGradient(h0, 0, h0 + hw, 0);
+    gr.addColorStop(0, rgba(lab.obs ? C3 : C1, .6)); gr.addColorStop(1, rgba(C2, .08));
+    x.fillStyle = gr; x.beginPath(); x.moveTo(h0, 0); for (let yy = 0; yy < h; yy += 2) x.lineTo(h0 + (lab.hist[yy] / mx) * hw, yy); x.lineTo(h0, h); x.closePath(); x.fill();
+    lab.parts = lab.parts.filter(p => {
+      const q = (now - p.t0) / 1100, sy = lab.obs ? (p.s ? G.cy + G.sd : G.cy - G.sd) : G.cy;
+      if (q >= 1) { land(p, G); return false; }
+      let px, py;
+      if (q < .42) { const a = q / .42; px = G.ex + (G.bx - G.ex) * a; py = G.cy + (sy - G.cy) * a; }
+      else { const a = (q - .42) / .58; px = G.bx + (G.sx - G.bx) * a; py = sy + (p.y - sy) * a; if (lab.obs && !p.f) { p.f = 1; lab.flash[p.s] = now; } }
+      if (lab.obs) glowDot(x, px, py, 9, C3);
+      else { x.globalAlpha = .7; glowDot(x, px, py, q < .42 ? 9 : 15, C1); x.globalAlpha = 1; }
+      return true;
+    });
+    x.font = mono(10); x.fillStyle = "rgba(200,208,255,.45)"; x.textAlign = "center";
+    x.fillText("SOURCE", G.ex, h - 16); x.fillText(lab.obs ? "SLITS · WATCHED" : "TWO SLITS", G.bx, h - 16); x.fillText("SCREEN", G.sx, h - 16);
+  }
+  Q("#slObs").onchange = e => {
+    lab.obs = e.target.checked;
+    Q("#labMode").textContent = lab.obs ? "Detector on: each particle picks a slit, two bands" : "Detector off: waves interfere, many stripes";
+    if (LW) labReset();
+  };
+  Q("#slReset").onclick = () => { if (LW) labReset(); };
+  new IntersectionObserver(es => { labVis = es[0].isIntersecting; if (!labVis) lab.last = 0; }, { rootMargin: "60px" }).observe(sc);
+
+  // constants scramble into place when they come into view
+  const scr = new IntersectionObserver(es => es.forEach(e => {
+    if (!e.isIntersecting || RM) return; scr.unobserve(e.target);
+    const el = e.target, nodes = [], tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), t0 = performance.now();
+    while (tw.nextNode()) nodes.push([tw.currentNode, tw.currentNode.nodeValue]);
+    const total = nodes.reduce((a, [, v]) => a + v.length, 0);
+    const step = now => {
+      const k = Math.min(1, (now - t0) / 1100); let pos = 0;
+      nodes.forEach(([n, fin]) => { n.nodeValue = k >= 1 ? fin : [...fin].map(ch => { const i = pos++; return /[0-9]/.test(ch) && i / total >= k ? String(Math.floor(Math.random() * 10)) : ch; }).join(""); });
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }), { threshold: .6 });
+  QA(".sv").forEach(el => scr.observe(el));
+
+  // one animation loop for everything; it idles while the chat is open or the tab is hidden
+  function loop(now) {
+    requestAnimationFrame(loop);
+    if (away()) { lab.last = 0; return; }
+    const t = RM ? 2 : now / 1000;
+    if (++qf % 3 === 0 && col === null && !RM) { th += .05; qDraw(); }
+    viz.forEach(v => {
+      if (!vis.get(v.c) || (RM && v.done)) return;
+      const [x, w, h] = fit(v.c); x.clearRect(0, 0, w, h); DRAW[v.k](x, w, h, t, v.st); v.done = 1;
+    });
+    if (labVis) labFrame(now);
+  }
+  qDraw(); requestAnimationFrame(loop);
 })();
 </script>
 <div id="mm" hidden></div>
