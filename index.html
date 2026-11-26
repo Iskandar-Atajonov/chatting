@@ -507,7 +507,7 @@ body.chatting #bg,body.chatting .veil,body.chatting main,body.chatting header,bo
 /* animated emoji + stickers */
 .aemo{display:inline-grid;place-items:center;width:var(--s);height:var(--s);vertical-align:middle;flex:none}
 .aemo img{width:100%;height:100%;object-fit:contain;display:block;-webkit-user-drag:none}
-.aemo.txt{font-size:calc(var(--s) * .8);line-height:1;animation:wob 2.6s ease-in-out infinite}
+.aemo.txt{font-size:calc(var(--s) * .8);line-height:1;animation:wob 2.6s ease-in-out 2}
 @keyframes wob{0%,100%{transform:rotate(0) scale(1)}25%{transform:rotate(-7deg) scale(1.06)}50%{transform:rotate(0) scale(.97)}75%{transform:rotate(7deg) scale(1.05)}}
 .astk{cursor:pointer;filter:drop-shadow(0 12px 18px rgba(0,0,0,.45));animation:stkIn .55s cubic-bezier(.2,1.5,.4,1) both;transition:transform .2s}
 .astk:hover{transform:scale(1.06) rotate(-3deg)}
@@ -2506,7 +2506,7 @@ function buildMsg(snap) {
   if (m.poll) b.append(renderPoll(snap.key, m.poll));
   if (m.text) {
     const eo = !m.image && !m.video && !m.voice && !m.round && !m.agif && !m.gif && !m.sticker && !m.poll && !m.reply && emojiOnly(m.text);
-    if (eo) { b.classList.add("noBg", "emo"); const w = document.createElement("div"); w.className = "bigemo"; eo.forEach(g => w.append(animEmoji(g, eo.length === 1 ? 112 : 70))); w.onclick = ev => { ev.stopPropagation(); screenFx(eo[0]); burstAt(w, eo, 8); }; b.append(w); }
+    if (eo) { b.classList.add("noBg", "emo"); const w = document.createElement("div"); w.className = "bigemo"; eo.forEach(g => w.append(animEmoji(g, eo.length === 1 ? 112 : 70))); w.onclick = ev => { ev.stopPropagation(); const hit = ev.target.closest && ev.target.closest(".aemo"); w.querySelectorAll(".aemo").forEach(x => { if (x !== hit && x._replay) x._replay(); }); screenFx(eo[0]); burstAt(w, eo, 8); }; b.append(w); }
     else b.append(richText(m.text, el));
   }
   if (m.expired) { const x = document.createElement("div"); x.className = "exp"; x.textContent = "Media expired (older than " + CLEAN_DAYS + " days)"; b.append(x); }
@@ -2833,15 +2833,57 @@ const RMo = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 // ---------- animated emoji (Noto Animated Emoji by Google, CC BY 4.0) with a CSS-animated fallback ----------
 const notoUrl = (e, fe) => "https://fonts.gstatic.com/s/e/notoemoji/latest/" + [...e].map(c => c.codePointAt(0).toString(16)).filter(h => fe || h !== "fe0f").join("_") + "/512.webp";
+// Noto's animated WebP loops forever. To make a sticker play only STK_LOOPS times we download the file once,
+// set its loop count in the WebP header (ANIM chunk) and show it from a blob: URL - the browser then plays it
+// that many times and stops on the last frame. Tapping the sticker makes a fresh blob: URL, which replays it.
+const STK_LOOPS = 2;
 const notoBad = new Set();
+const notoFiles = new Map();
+function webpLoops(buf, n) {
+  const dv = new DataView(buf), tag = o => String.fromCharCode(dv.getUint8(o), dv.getUint8(o + 1), dv.getUint8(o + 2), dv.getUint8(o + 3));
+  if (buf.byteLength > 20 && tag(0) === "RIFF" && tag(8) === "WEBP") {
+    for (let p = 12; p + 8 <= buf.byteLength;) {
+      const sz = dv.getUint32(p + 4, true);
+      if (tag(p) === "ANIM" && sz >= 6 && p + 14 <= buf.byteLength) { dv.setUint16(p + 12, n, true); break; }
+      p += 8 + sz + (sz & 1);
+    }
+  }
+  return new Blob([buf], { type: "image/webp" });
+}
+function notoBlob(url) {
+  let p = notoFiles.get(url);
+  if (!p) {
+    p = fetch(url).then(r => { if (!r.ok) { const er = new Error("HTTP " + r.status); er.http = r.status; throw er; } return r.arrayBuffer(); }).then(b => webpLoops(b, STK_LOOPS));
+    notoFiles.set(url, p);
+    p.catch(er => { if (!er.http) notoFiles.delete(url); });
+  }
+  return p;
+}
 function animEmoji(e, size, cls) {
   const w = document.createElement("span"); w.className = "aemo " + (cls || ""); w.style.setProperty("--s", size + "px");
   const txt = () => { w.classList.add("txt"); w.textContent = e; };
   if (TG.anim === false) { txt(); w.classList.add("still"); return w; }
+  let fe = true, blob = null, url = "", net = false;
+  // play from the first frame again (a new blob: URL = a new image = loop counter back to 0)
+  const play = w._replay = () => {
+    if (w.classList.contains("txt")) { w.style.animation = "none"; void w.offsetWidth; w.style.animation = ""; return; }  // text fallback: restart the CSS wobble
+    if (!blob) return;
+    const old = url; url = URL.createObjectURL(blob); img.src = url; if (old) URL.revokeObjectURL(old);
+  };
+  w.addEventListener("click", () => play());
   if (notoBad.has(e)) { txt(); return w; }
-  const img = new Image(); img.alt = e; img.decoding = "async"; img.loading = "lazy"; img.draggable = false; let step = 0;
-  img.onerror = () => { if (!step && /️/.test(e)) { step = 1; img.src = notoUrl(e, false); } else { notoBad.add(e); img.remove(); txt(); } };
-  img.src = notoUrl(e, true); w.append(img); return w;
+  const img = new Image(); img.alt = e; img.decoding = "async"; img.loading = "lazy"; img.draggable = false;
+  img.onerror = () => {
+    if (!blob && fe && /️/.test(e)) { fe = false; img.src = notoUrl(e, false); return; }
+    notoBad.add(e); img.remove(); txt();
+  };
+  const go = () => notoBlob(notoUrl(e, fe)).then(b => { blob = b; play(); }, er => {
+    if (!er.http) net = true;
+    if (fe && /️/.test(e)) { fe = false; go(); }                      // the file may be stored without fe0f in its name
+    else if (net) { fe = true; img.src = notoUrl(e, true); }               // can't read the file from script (offline/blocked): plain image, loops forever
+    else { notoBad.add(e); img.remove(); txt(); }                          // no animation for this emoji: CSS fallback
+  });
+  w.append(img); go(); return w;
 }
 const graphemes = typeof Intl !== "undefined" && Intl.Segmenter ? new Intl.Segmenter(undefined, { granularity: "grapheme" }) : null;
 function emojiOnly(t) {
